@@ -1,0 +1,22 @@
+{
+    "manifest_version": 2,
+
+    "name": "LeetPlug",
+    "description": "This extension adds tracking features to the LeetCode interface.",
+    "version": "1.0",
+
+    "browser_action": {
+        "default_icon": "images/icon.png",
+        "default_popup": "src/popup.html"
+    },
+
+    "permissions": ["activeTab"],
+
+    "content_scripts": [
+    {
+        "matches": ["https://leetcode.com/problems/*"],
+        "run_at": "document_start",
+        "js": ["thirdParty/jquery-3.5.1.slim.min.js", "src/problemsScript.js"]
+    }
+    ]
+}

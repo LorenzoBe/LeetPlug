@@ -1,0 +1,5 @@
+# Application files
+config.ini
+
+# MACOS files
+.DS_Store
