@@ -1,0 +1,1 @@
+GUNICORN_CMD_ARGS="--timeout 600 --access-logfile '-' --error-logfile '-' --bind=0.0.0.0:8000 --chdir=/home/site/wwwroot --workers=4" gunicorn application:app
