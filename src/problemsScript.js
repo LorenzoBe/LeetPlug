@@ -5,6 +5,7 @@ window.addEventListener("load", onLoadPage, false);
 var problemDescriptionElement = "[data-key='description-content']";
 var codingPanelElement = ".content__Ztw-";
 var runCodeButton = "[data-cy='run-code-btn']";
+var resetCodeButton = ".reset-code-btn__3ADT";
 
 var customControlButtons = `
 <div id='controlButtons'>
@@ -98,8 +99,14 @@ function onLoadPage (evt) {
 
             // set the callbacks on click on button
             $("#showProblemWithTimer").click(function(e) {
-                showAll();
-                startTimer();
+                // if the coding panel is not clean
+                if ($(resetCodeButton)[0] !== undefined) {
+                    // trigger the reset of the code
+                    $(resetCodeButton)[0].click();
+                } else {
+                    showAll();
+                    startTimer();
+                }
             });
             $("#showProblemNoTimer").click(function(e) {
                 showAll();
