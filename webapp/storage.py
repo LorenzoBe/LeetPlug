@@ -22,7 +22,7 @@ class Storage():
             # https://github.com/Azure/azure-sdk-for-python/pull/11792/commits
             self.users.upsert_item(user, etag=etag, match_condition=MatchConditions.IfNotModified)
 
-        self.users.upsert_item(problem)
+        self.users.upsert_item(user)
 
     def getUsersIterators(self, userId=None):
         if userId:
@@ -45,11 +45,11 @@ class Storage():
         return list(self.getUsersIterators())
 
     def deleteUser(self, userId: str):
-        for item in self.getProblemsIterators(userId):
+        for item in self.getUsersIterators(userId):
             self.users.delete_item(item, partition_key=userId)
 
     def deleteUsers(self):
-        for item in self.getProblemsIterators():
+        for item in self.getUsersIterators():
             self.users.delete_item(item, partition_key=userId)
 
     # *********************************************************************************************

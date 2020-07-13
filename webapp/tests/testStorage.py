@@ -9,6 +9,14 @@ from storage import Storage
 
 class TestStorage(unittest.TestCase):
     def setUp(self):
+        self.newUser = {
+            'id': 'testuser.testuser@gmail.com',
+            'userId': 'testuser',
+            'email': 'testuser.testuser@gmail.com',
+            'password': 'F05300444E4E8E933FA35E184DDD45EF',
+            'key': '1764caef-e1ea-4486-9287-34dce7e356d6',
+        }
+
         self.newProblem = {
             'id': 'testuser:search-in-a-sorted-array-of-unknown-size',
             'userId': 'testuser',
@@ -19,6 +27,31 @@ class TestStorage(unittest.TestCase):
                 'submit_ok': [{'id': 1,'time': 1588449067}]
             },
         }
+        self.username = 'testuser'
+
+    def test_get_user(self):
+        config = configparser.ConfigParser()
+        config.read('../config.ini')
+        storage = Storage(config)
+
+        # delete testuser if present
+        storage.deleteUser(self.username)
+        users = storage.getUser(self.username)
+        self.assertEqual(len(users), 0)
+
+        storage.insertUser(self.newUser)
+        users = storage.getUser(self.username)
+        self.assertEqual(len(users), 1)
+
+        equalItems = 0
+        for k in self.newUser:
+            if k in users[0] and self.newUser[k] == users[0][k]:
+                equalItems += 1
+        self.assertEqual(equalItems, len(self.newUser))
+
+        storage.deleteUser(self.username)
+        users = storage.getUser(self.username)
+        self.assertEqual(len(users), 0)
 
     def test_get_problems(self):
         config = configparser.ConfigParser()
@@ -26,19 +59,19 @@ class TestStorage(unittest.TestCase):
         storage = Storage(config)
 
         # delete all user problems
-        storage.deleteProblems('testuser')
+        storage.deleteProblems(self.username)
         storage.insertProblem(self.newProblem)
-        problems = storage.getProblems('testuser')
+        problems = storage.getProblems(self.username)
         self.assertEqual(len(problems), 1)
 
         equalItems = 0
         for k in self.newProblem:
             if k in problems[0] and self.newProblem[k] == problems[0][k]:
                 equalItems += 1
-        self.assertEqual(equalItems, 4)
+        self.assertEqual(equalItems, len(self.newProblem))
 
-        storage.deleteProblems('testuser')
-        problems = storage.getProblems('testuser')
+        storage.deleteProblems(self.username)
+        problems = storage.getProblems(self.username)
         self.assertEqual(len(problems), 0)
 
     def test_update_problems(self):
@@ -47,11 +80,11 @@ class TestStorage(unittest.TestCase):
         storage = Storage(config)
 
         # delete all user problems
-        storage.deleteProblems('testuser')
+        storage.deleteProblems(self.username)
         # insert the problem to DB
         storage.insertProblem(self.newProblem)
         # get the problem from DB
-        problems = storage.getProblems('testuser')
+        problems = storage.getProblems(self.username)
         self.assertEqual(len(problems), 1)
 
         # update and send back the problem: in this case etag matches
@@ -70,12 +103,12 @@ class TestStorage(unittest.TestCase):
         self.assertTrue(exceptionRaised)
 
         # get again the problem from DB
-        problems = storage.getProblems('testuser')
+        problems = storage.getProblems(self.username)
         self.assertEqual(len(problems), 1)
         self.assertEqual(len(problems[0]['events']['start']), 2)
 
-        storage.deleteProblems('testuser')
-        problems = storage.getProblems('testuser')
+        storage.deleteProblems(self.username)
+        problems = storage.getProblems(self.username)
         self.assertEqual(len(problems), 0)
 
 if __name__ == '__main__':

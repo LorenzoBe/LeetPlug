@@ -65,7 +65,7 @@ This is an user entry:
 The user contains the LeetCode user information and the key, that will be used to configure the client side extension.
 
 **problems**
-This is problem entry:
+This is a problem entry:
 ```
 {
   'id': 'testuser:search-in-a-sorted-array-of-unknown-size',
@@ -78,7 +78,7 @@ This is problem entry:
   }
 }
 ```
-Theproblem contains the reference to the user and the problem. It stores all the events connected to them. So for each problem attempted by the user will be stored the events of start coding, submission accepted or submission refused. An id and a timestamp are associated with every event so we can track how long it took to complete a problem, how many times was attempted and a lot of other useful metrics.  
+The problem contains the reference to the user and the problem. It stores all the events connected to them. So for each problem attempted by the user will be stored the events of start coding, submission accepted or submission refused. An id and a timestamp are associated with every event so we can track how long it took to complete a problem, how many times was attempted and a lot of other useful metrics.  
 Cosmos DB should be able to handle optimistic concurrency using the _etag value inside an item (see [here](https://docs.microsoft.com/en-us/azure/cosmos-db/database-transactions-optimistic-concurrency) for details) but unfortunately the Python library was bugged when I started the implementation. Please see below a fix for this.
 <details>
 <summary>How to fix Python azure-cosmos 4.0.0 ETAG bug</summary>
