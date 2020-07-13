@@ -12,17 +12,42 @@ class Storage():
         database = client.get_database_client(config['AzureCosmos']['DatabaseName'])
         self.users = database.get_container_client(config['AzureCosmos']['UsersContainerName'])
         self.events = database.get_container_client(config['AzureCosmos']['EventsContainerName'])
+        self.counters = database.get_container_client(config['AzureCosmos']['CountersContainerName'])
+
+    def getNextCounter(self, name: str) -> int:
+        for i in range(1, 10):
+            userIdCounter = list(self.counters.query_items(
+                                    query='SELECT * FROM c WHERE c.id=@name',
+                                    parameters=[
+                                        dict(name='@name', value=name)
+                                    ],
+                                    enable_cross_partition_query=True))
+
+            if (len(userIdCounter) == 0):
+                print('{} counter not found'.format(name))
+                return -1
+
+            userIdCounter[0]['value'] += 1
+            try:
+                self.counters.upsert_item(userIdCounter[0], etag=userIdCounter[0]['_etag'], match_condition=MatchConditions.IfNotModified)
+                return userIdCounter[0]['value']
+            except exceptions.CosmosAccessConditionFailedError:
+                continue
+
+        return -2
 
     # *********************************************************************************************
     # USERS
     # *********************************************************************************************
-    def insertUser(self, user: dict, etag=None):
-        if etag:
-            # WARNING: this will not work without the fix in
-            # https://github.com/Azure/azure-sdk-for-python/pull/11792/commits
+    def upsertUser(self, user: dict, etag='defualtToRaiseErrorIfPresent') -> bool:
+        # WARNING: this will not work without the fix in
+        # https://github.com/Azure/azure-sdk-for-python/pull/11792/commits
+        try:
             self.users.upsert_item(user, etag=etag, match_condition=MatchConditions.IfNotModified)
+        except exceptions.CosmosAccessConditionFailedError:
+            return False
 
-        self.users.upsert_item(user)
+        return True
 
     def getUsersIterators(self, userId=None):
         if userId:
@@ -63,7 +88,7 @@ class Storage():
 
         self.events.upsert_item(problem)
 
-    def getProblemsIterators(self, userId: str):
+    def getProblemsIterators(self, userId: int):
         problems = self.events.query_items(
             query='SELECT * FROM c WHERE c.userId=@userId',
             parameters=[
@@ -72,9 +97,9 @@ class Storage():
             enable_cross_partition_query=True)
         return problems
 
-    def getProblems(self, userId: str) -> list:
+    def getProblems(self, userId: int) -> list:
         return list(self.getProblemsIterators(userId))
 
-    def deleteProblems(self, userId: str):
+    def deleteProblems(self, userId: int):
         for item in self.getProblemsIterators(userId):
             self.events.delete_item(item, partition_key=userId)
