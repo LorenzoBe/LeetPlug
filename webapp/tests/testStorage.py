@@ -2,19 +2,14 @@ import configparser
 import json
 import sys
 import unittest
-import azure.cosmos.exceptions as exceptions
+from azure.cosmos import exceptions
 
 sys.path.append('../')
 from storage import Storage
 
 class TestStorage(unittest.TestCase):
-
-    def test_get_problems(self):
-        config = configparser.ConfigParser()
-        config.read('../config.ini')
-        storage = Storage(config)
-
-        newProblem = {
+    def setUp(self):
+        self.newProblem = {
             'id': 'testuser:search-in-a-sorted-array-of-unknown-size',
             'userId': 'testuser',
             'problem': 'search-in-a-sorted-array-of-unknown-size',
@@ -25,11 +20,23 @@ class TestStorage(unittest.TestCase):
             },
         }
 
+    def test_get_problems(self):
+        config = configparser.ConfigParser()
+        config.read('../config.ini')
+        storage = Storage(config)
+
         # delete all user problems
         storage.deleteProblems('testuser')
-        storage.insertProblem(newProblem)
+        storage.insertProblem(self.newProblem)
         problems = storage.getProblems('testuser')
         self.assertEqual(len(problems), 1)
+
+        equalItems = 0
+        for k in self.newProblem:
+            if k in problems[0] and self.newProblem[k] == problems[0][k]:
+                equalItems += 1
+        self.assertEqual(equalItems, 4)
+
         storage.deleteProblems('testuser')
         problems = storage.getProblems('testuser')
         self.assertEqual(len(problems), 0)
@@ -39,21 +46,10 @@ class TestStorage(unittest.TestCase):
         config.read('../config.ini')
         storage = Storage(config)
 
-        newProblem = {
-            'id': 'testuser:search-in-a-sorted-array-of-unknown-size',
-            'userId': 'testuser',
-            'problem': 'search-in-a-sorted-array-of-unknown-size',
-            'events': {
-                'start': [{'id': 1, 'time': 1584449067}],
-                'submit_ko': [{'id': 1,'time': 1585449067}],
-                'submit_ok': [{'id': 1,'time': 1588449067}]
-            },
-        }
-
         # delete all user problems
         storage.deleteProblems('testuser')
         # insert the problem to DB
-        storage.insertProblem(newProblem)
+        storage.insertProblem(self.newProblem)
         # get the problem from DB
         problems = storage.getProblems('testuser')
         self.assertEqual(len(problems), 1)
@@ -72,6 +68,11 @@ class TestStorage(unittest.TestCase):
         except exceptions.CosmosAccessConditionFailedError:
             exceptionRaised = True
         self.assertTrue(exceptionRaised)
+
+        # get again the problem from DB
+        problems = storage.getProblems('testuser')
+        self.assertEqual(len(problems), 1)
+        self.assertEqual(len(problems[0]['events']['start']), 2)
 
         storage.deleteProblems('testuser')
         problems = storage.getProblems('testuser')

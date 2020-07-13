@@ -46,12 +46,55 @@ Since the LeetCode page are mostly dynamic, I was not able to easily refer to in
 To be able to track the user activity we need to intercept the Submit requests and the responses. Here the Chrome API sult come to help us! The main documentation is [here](https://developer.chrome.com/extensions/webRequest).
 
 ## Application server
-Timeseries DB? Multicolumn?
+We need an application server and a database to track the single user activities. It could be done with a local database, but then we'll loose the possibility to work from multiple machines and also to compare our data with other users.  
+Since I am not a big expert, I reused what I learned with my previous project [LeetcodeHistory](https://github.com/LorenzoBe/LeetcodeHistory). The main Web Service will be written in Python and the events will be stored into a NOSQL database. I have a good knowledge now of Azure services so I used a Python WebApp connected to CosmosDB which has a nice [Python SDK](https://pypi.org/project/azure-cosmos/4.0.0/).  
+Cosmos DB stores the data into documents, that can be easily transformed to JSON structures.  
+I created two containers, defined as follow:
+
+**users**
+This is an user entry:
 ```
 {
-    "users": ["user1", "user2"],
-    "user:user1": ["problem1", "problem2"],
-    "user:user2": ["problem3", "problem4"],
-    "user:user1:problem1": ["{id:111, event: start, time: 1234567}", "{id:111, event: success, time: 1235555}"],
-    "user:user1:problem2": ["{id:333, event: start, time: 4444444}", "{id:333, event: fail, time: 6666666}"]
+  'id': 'testuser.testuser@gmail.com',
+  'userId': 'testuser',
+  'email': 'testuser.testuser@gmail.com',
+  'password': 'F05300444E4E8E933FA35E184DDD45EF',
+  'key': '1764caef-e1ea-4486-9287-34dce7e356d6',
 }
+```
+The user contains the LeetCode user information and the key, that will be used to configure the client side extension.
+
+**problems**
+This is problem entry:
+```
+{
+  'id': 'testuser:search-in-a-sorted-array-of-unknown-size',
+  'userId': 'testuser',
+  'problem': 'search-in-a-sorted-array-of-unknown-size',
+  'events': {
+    'start': [{'id': 1, 'time': 1584449067}],
+    'submit_ko': [{'id': 1,'time': 1585449067}],
+    'submit_ok': [{'id': 1,'time': 1588449067}]
+  }
+}
+```
+Theproblem contains the reference to the user and the problem. It stores all the events connected to them. So for each problem attempted by the user will be stored the events of start coding, submission accepted or submission refused. An id and a timestamp are associated with every event so we can track how long it took to complete a problem, how many times was attempted and a lot of other useful metrics.  
+Cosmos DB should be able to handle optimistic concurrency using the _etag value inside an item (see [here](https://docs.microsoft.com/en-us/azure/cosmos-db/database-transactions-optimistic-concurrency) for details) but unfortunately the Python library was bugged when I started the implementation. Please see below a fix for this.
+<details>
+<summary>How to fix Python azure-cosmos 4.0.0 ETAG bug</summary>
+<p>
+Unfortunately the version 4.0.0 of ezure-cosmos is bugged.  
+The bug has been already solved and merged in the master [github](https://github.com/Azure/azure-sdk-for-python/pull/11792/commits/945648d26d2a077fa6544fe85648b58b5f9cedf9). The core change is in the "container.py" file:  
+
+
+```python
+result = self.client_connection.UpsertItem(
+    database_or_container_link=self.container_link,
+    document=body,
+    options=request_options,
+    **kwargs
+)
+```
+
+</p>
+</details>
