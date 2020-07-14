@@ -51,19 +51,19 @@ class Storage():
 
     def getUsersIterators(self, userId=None):
         if userId:
-            users = self.users.query_items(
+            items = self.users.query_items(
                 query='SELECT * FROM c WHERE c.userId=@userId',
                 parameters=[
                     dict(name='@userId', value=userId)
                 ],
                 enable_cross_partition_query=True)
         else:
-            users = self.users.query_items(
+            items = self.users.query_items(
                 query='SELECT * FROM c',
                 enable_cross_partition_query=True)
-        return users
+        return items
 
-    def getUser(self, userId:str) -> list:
+    def getUser(self, userId:int) -> list:
         return list(self.getUsersIterators(userId))
 
     def getUsers(self) -> list:
@@ -89,13 +89,13 @@ class Storage():
         self.events.upsert_item(problem)
 
     def getProblemsIterators(self, userId: int):
-        problems = self.events.query_items(
+        items = self.events.query_items(
             query='SELECT * FROM c WHERE c.userId=@userId',
             parameters=[
                 dict(name='@userId', value=userId)
             ],
             enable_cross_partition_query=True)
-        return problems
+        return items
 
     def getProblems(self, userId: int) -> list:
         return list(self.getProblemsIterators(userId))
