@@ -11,6 +11,7 @@ class TestStorage(unittest.TestCase):
     def setUp(self):
         self.newUser = {
             'id': 'testuser.testuser@gmail.com',
+            'email': 'testuser.testuser@gmail.com',
             'userId': 1,
             'key': '1764caef-e1ea-4486-9287-34dce7e356d6',
         }

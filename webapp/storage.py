@@ -71,11 +71,11 @@ class Storage():
 
     def deleteUser(self, userId: str):
         for item in self.getUsersIterators(userId):
-            self.users.delete_item(item, partition_key=userId)
+            self.users.delete_item(item, partition_key=item['email'])
 
     def deleteUsers(self):
         for item in self.getUsersIterators():
-            self.users.delete_item(item, partition_key=userId)
+            self.users.delete_item(item, partition_key=item['email'])
 
     # *********************************************************************************************
     # PROBLEMS

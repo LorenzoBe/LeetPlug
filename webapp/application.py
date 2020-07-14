@@ -45,6 +45,7 @@ def usersFunction():
 
         newUser = {
             'id': email,
+            'email': email,
             'userId': userId,
             'key': userKey
         }
