@@ -1,8 +1,11 @@
 from configparser import ConfigParser
+from email_validator import validate_email, EmailNotValidError
 from flask import Flask
 from flask import render_template
 from flask import request
 from flask_httpauth import HTTPBasicAuth
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from werkzeug.security import generate_password_hash, check_password_hash
 import uuid
 import time
@@ -18,6 +21,10 @@ config.read('config.ini')
 users = {
     config['WebApp']['AdminUsername']: generate_password_hash(config['WebApp']['AdminPassword']),
 }
+limiter = Limiter(
+    app,
+    key_func=get_remote_address
+)
 
 storage = Storage(config)
 emailHelper = EmailHelper(config)
@@ -28,11 +35,23 @@ def verify_password(username, password):
             check_password_hash(users.get(username), password):
         return username
 
+def usersRequestFilter() -> str:
+    try:
+        valid = validate_email(request.args.get('email', default='', type = str))
+        email = valid.email
+    except EmailNotValidError as e:
+        return ''
+
+    return email
+
 @app.route('/users', methods = ['PUT'])
 @auth.login_required
+@limiter.limit("1000/day")
+@limiter.limit("100/hour")
+@limiter.limit("1/minute", key_func=usersRequestFilter)
 def usersFunction():
     if request.method == 'PUT':
-        email = request.args.get('email', default='', type = str)
+        email = usersRequestFilter()
 
         # TODO: add a better validation here
         if email == '': return 'Request failed. Email missing.', 500
@@ -59,12 +78,23 @@ def usersFunction():
 
     return 'Request unsupported.', 500
 
+def eventsRequestFilter() -> str:
+    userKey = request.args.get('key', default='', type = str)
+    try:
+        key = uuid.UUID(userKey, version=4)
+    except ValueError:
+        return ''
+
+    return userKey
+
 @app.route('/events', methods = ['PUT'])
 @auth.login_required
+@limiter.limit("1000/hour")
+@limiter.limit("1/second", key_func=eventsRequestFilter)
 def eventsFunction():
     if request.method == 'PUT':
         userId = request.args.get('id', default=0, type = int)
-        userKey = request.args.get('key', default='', type = str)
+        userKey = eventsRequestFilter()
         problem = request.args.get('problem', default='', type = str)
         event = request.args.get('event', default='', type = str)
         session = request.args.get('session', default='', type = str)
