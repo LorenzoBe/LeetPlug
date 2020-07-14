@@ -39,12 +39,12 @@ class TestStorage(unittest.TestCase):
     def test_get_user(self):
         # delete testuser if present
         self.storage.deleteUser(self.userId)
-        users = self.storage.getUser(self.userId)
+        users = self.storage.getUser(userId=self.userId, userKey=None)
         self.assertEqual(len(users), 0)
 
         # insert the user for the first time
         self.assertTrue(self.storage.upsertUser(self.newUser))
-        users = self.storage.getUser(self.userId)
+        users = self.storage.getUser(userId=self.userId, userKey=None)
         self.assertEqual(len(users), 1)
 
         # check if the returned user is as expected
@@ -62,7 +62,7 @@ class TestStorage(unittest.TestCase):
 
         # cleanup
         self.storage.deleteUser(self.userId)
-        users = self.storage.getUser(self.userId)
+        users = self.storage.getUser(userId=self.userId, userKey=None)
         self.assertEqual(len(users), 0)
 
     def test_get_problems(self):

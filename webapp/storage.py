@@ -49,12 +49,27 @@ class Storage():
 
         return True
 
-    def getUsersIterators(self, userId=None):
-        if userId:
+    def getUsersIterators(self, userId=None, userKey=None):
+        if userId and userKey:
+            items = self.users.query_items(
+                query='SELECT * FROM c WHERE c.userId=@userId AND c.key=@userKey',
+                parameters=[
+                    dict(name='@userId', value=userId),
+                    dict(name='@userKey', value=userKey)
+                ],
+                enable_cross_partition_query=True)
+        elif userId:
             items = self.users.query_items(
                 query='SELECT * FROM c WHERE c.userId=@userId',
                 parameters=[
                     dict(name='@userId', value=userId)
+                ],
+                enable_cross_partition_query=True)
+        elif userKey:
+            items = self.users.query_items(
+                query='SELECT * FROM c WHERE c.key=@userKey',
+                parameters=[
+                    dict(name='@userKey', value=userKey)
                 ],
                 enable_cross_partition_query=True)
         else:
@@ -63,14 +78,14 @@ class Storage():
                 enable_cross_partition_query=True)
         return items
 
-    def getUser(self, userId:int) -> list:
-        return list(self.getUsersIterators(userId))
+    def getUser(self, userId: int, userKey: str) -> list:
+        return list(self.getUsersIterators(userId, userKey))
 
     def getUsers(self) -> list:
         return list(self.getUsersIterators())
 
     def deleteUser(self, userId: str):
-        for item in self.getUsersIterators(userId):
+        for item in self.getUsersIterators(userId=userId):
             self.users.delete_item(item, partition_key=item['email'])
 
     def deleteUsers(self):
