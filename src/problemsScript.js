@@ -74,6 +74,7 @@ function hideTimer() {
 
 // Show original hidden elements
 function showAll() {
+    $("#controlButtonsText").attr("style", "display: none;");
     $("#showProblemWithTimer").attr("style", "display: none;");
     $("#showProblemNoTimer").attr("style", "display: none;");
     $(problemDescriptionElement).attr("style", "display: visible;");
