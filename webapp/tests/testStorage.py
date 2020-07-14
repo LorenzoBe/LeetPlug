@@ -86,25 +86,20 @@ class TestStorage(unittest.TestCase):
         # delete all user problems
         self.storage.deleteProblems(self.userId)
         # insert the problem to DB
-        self.storage.insertProblem(self.newProblem)
+        self.assertTrue(self.storage.insertProblem(self.newProblem))
+        # try to insert the same problem: should fail since already existing
+        self.assertFalse(self.storage.insertProblem(self.newProblem))
         # get the problem from DB
         problems = self.storage.getProblems(self.userId)
         self.assertEqual(len(problems), 1)
 
         # update and send back the problem: in this case etag matches
         problems[0]['events']['start'].append({'id': 2, 'time': 1594449067})
-        self.storage.insertProblem(problems[0], etag=problems[0]['_etag'])
+        self.assertTrue(self.storage.insertProblem(problems[0], etag=problems[0]['_etag']))
 
         # update and send back the problem: now it should fails since etag doesn't match
         problems[0]['events']['start'].append({'id': 3, 'time': 1594449067})
-        # don't know why the following line doesn't work! I need to catch the exception
-        #self.assertRaises(exceptions.CosmosAccessConditionFailedError, self.storage.insertProblem(problems[0], etag=currentEtag))
-        exceptionRaised = False
-        try:
-            self.storage.insertProblem(problems[0], etag=problems[0]['_etag'])
-        except exceptions.CosmosAccessConditionFailedError:
-            exceptionRaised = True
-        self.assertTrue(exceptionRaised)
+        self.assertFalse(self.storage.insertProblem(problems[0], etag=problems[0]['_etag']))
 
         # get again the problem from DB
         problems = self.storage.getProblems(self.userId)

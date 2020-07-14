@@ -95,26 +95,34 @@ class Storage():
     # *********************************************************************************************
     # PROBLEMS
     # *********************************************************************************************
-    def insertProblem(self, problem: dict, etag=None):
-        if etag:
-            # WARNING: this will not work without the fix in
-            # https://github.com/Azure/azure-sdk-for-python/pull/11792/commits
+    def insertProblem(self, problem: dict, etag='defualtToRaiseErrorIfPresent') -> bool:
+        try:
             self.events.upsert_item(problem, etag=etag, match_condition=MatchConditions.IfNotModified)
+        except exceptions.CosmosAccessConditionFailedError:
+            return False
 
-        self.events.upsert_item(problem)
+        return True
 
-    def getProblemsIterators(self, userId: int):
-        items = self.events.query_items(
-            query='SELECT * FROM c WHERE c.userId=@userId',
-            parameters=[
-                dict(name='@userId', value=userId)
-            ],
-            enable_cross_partition_query=True)
+    def getProblemsIterators(self, userId: int, id: str):
+        if id:
+            items = self.events.query_items(
+                query='SELECT * FROM c WHERE c.id=@id',
+                parameters=[
+                    dict(name='@id', value=id)
+                ],
+                enable_cross_partition_query=True)
+        else:
+            items = self.events.query_items(
+                query='SELECT * FROM c WHERE c.userId=@userId',
+                parameters=[
+                    dict(name='@userId', value=userId)
+                ],
+                enable_cross_partition_query=True)
         return items
 
-    def getProblems(self, userId: int) -> list:
-        return list(self.getProblemsIterators(userId))
+    def getProblems(self, userId: int, id: str) -> list:
+        return list(self.getProblemsIterators(userId, id=id))
 
     def deleteProblems(self, userId: int):
-        for item in self.getProblemsIterators(userId):
+        for item in self.getProblemsIterators(userId, id=None):
             self.events.delete_item(item, partition_key=userId)
