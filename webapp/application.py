@@ -5,6 +5,7 @@ from flask import request
 from flask_httpauth import HTTPBasicAuth
 from werkzeug.security import generate_password_hash, check_password_hash
 import uuid
+import time
 
 from storage import Storage
 from gmailHelper import EmailHelper
@@ -67,12 +68,39 @@ def eventsFunction():
         problem = request.args.get('problem', default='', type = str)
         event = request.args.get('event', default='', type = str)
         session = request.args.get('session', default='', type = str)
+        eventDescription = {'id': session, 'time': int(time.time())}
 
         user = storage.getUser(userId=userId, userKey=userKey)
         if len(user) != 1: return 'Request failed. User issue.', 500
+        if userKey != user[0]['key']:
+            return 'Request failed. User issue.', 500
 
-        
+        problemId = '{}:{}'.format(userId, problem)
+        problems = storage.getProblems(userId, problemId)
+        if len(problems) == 0:
+            # first insert
+            newProblem = {
+                'id': problemId,
+                'userId': userId,
+                'problem': problem,
+                'events': {}
+            }
+            if not event in newProblem['events']:
+                newProblem['events'][event] = []
+            newProblem['events'][event].append(eventDescription)
 
-        return "ECHO: PUT\n"
+            if not storage.insertProblem(newProblem):
+                return 'Request failed. Insert issue.', 500
+        else:
+            # update
+            newProblem = problems[0]
+            if not event in newProblem['events']:
+                newProblem['events'][event] = []
+            newProblem['events'][event].append(eventDescription)
+
+            if not storage.insertProblem(newProblem, etag=newProblem['_etag']):
+                return 'Request failed. Insert issue.', 500
+
+        return 'Request succeded.', 202
     
-    return "ECHO: UNSUPPORTED\n"
+    return 'Request unsupported.', 500
