@@ -62,6 +62,17 @@ def usersFunction():
 @auth.login_required
 def eventsFunction():
     if request.method == 'PUT':
+        userId = request.args.get('id', default=0, type = int)
+        userKey = request.args.get('key', default='', type = str)
+        problem = request.args.get('problem', default='', type = str)
+        event = request.args.get('event', default='', type = str)
+        session = request.args.get('session', default='', type = str)
+
+        user = storage.getUser(userId=userId, userKey=userKey)
+        if len(user) != 1: return 'Request failed. User issue.', 500
+
+        
+
         return "ECHO: PUT\n"
     
     return "ECHO: UNSUPPORTED\n"
