@@ -7,6 +7,7 @@ from flask_httpauth import HTTPBasicAuth
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from werkzeug.security import generate_password_hash, check_password_hash
+import json
 import uuid
 import time
 
@@ -137,9 +138,27 @@ def eventsFunction():
 
 @app.route('/')
 def root():
-    username = request.args.get('username', type = int)
+    userId = request.args.get('userId', type = int)
 
-    if (username == None):
-        username = 1
+    if (userId == None):
+        userId = 57
 
-    return render_template('index.html', usernamePlaceholder = username)
+    problems = storage.getProblems(userId, id=None)
+    print(problems)
+
+    problemsForJs = {'problems': []}
+
+    for problem in problems:
+        problemJs = {}
+        problemJs['Problem'] = problem['problem']
+        problemJs['Accepted'] = "1"
+        problemJs['Rejected'] = "2"
+        problemJs['Last Accepted'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(problem['_ts']))
+        problemJs['Good'] = "3"
+        problemJs['Bad'] = "4"
+        problemJs['Ugly (Average)'] = "5"
+        problemJs['Users Average'] = "6"
+
+        problemsForJs['problems'].append(problemJs)
+
+    return render_template('index.html', problems=json.dumps(problemsForJs), userIdPlaceholder = userId)

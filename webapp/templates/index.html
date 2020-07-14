@@ -26,16 +26,29 @@ body {
 <body>
 <header>
 <h1 >LeetPlug</h1>
-User number: {{ usernamePlaceholder|safe }}
+User number: {{ userIdPlaceholder|safe }}
 </header>
 <div id="table_container">
 <table id="example" class="display" width="100%"></table>
 </div>
 <script>
-var dataSet = [
-    [ "<a href='https://leetcode.com/problems/insert-into-a-binary-search-tree/' target='_blank'>insert-into-a-binary-search-tree</a>", "10", "2", "2010/03/25 10:00:00", "13 min 12 sec", "35 min 43 sec", "15 min 10 sec", "25 min 10 sec" ],
-    [ "<a href='https://leetcode.com/problems/minimum-ascii-delete-sum-for-two-strings/' target='_blank'>minimum-ascii-delete-sum-for-two-strings</a>", "1", "5", "2011/07/25 10:00:00", "3 min 12 sec", "25 min 43 sec", "5 min 10 sec", "4 min 10 sec" ]
-];
+
+var problemsFromPy = JSON.parse('{{ problems|safe }}');
+var dataSet = [];
+
+for (var i = 0; i < problemsFromPy.problems.length; ++i) {
+  var problem = [];
+  problem.push(problemsFromPy.problems[i]['Problem']);
+  problem.push(problemsFromPy.problems[i]['Accepted']);
+  problem.push(problemsFromPy.problems[i]['Rejected']);
+  problem.push(problemsFromPy.problems[i]['Last Accepted']);
+  problem.push(problemsFromPy.problems[i]['Good']);
+  problem.push(problemsFromPy.problems[i]['Bad']);
+  problem.push(problemsFromPy.problems[i]['Ugly (Average)']);
+  problem.push(problemsFromPy.problems[i]['Users Average']);
+
+  dataSet.push(problem);
+}
  
 $(document).ready(function() {
     $('#example').DataTable( {
