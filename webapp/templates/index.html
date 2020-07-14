@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+
+<head>
+<title>LeetPlug - Author: Lorenzo Bertelli</title>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css">
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+<style>
+header {
+  text-align: center;
+}
+footer {
+  text-align: center;
+}
+body {
+  background-color: rgb(255, 255, 255);
+}
+#table_container {
+  width: 90%;
+  margin: auto;
+}
+</style>
+</head>
+
+<body>
+<header>
+<h1 >LeetPlug</h1>
+User number: {{ usernamePlaceholder|safe }}
+</header>
+<div id="table_container">
+<table id="example" class="display" width="100%"></table>
+</div>
+<script>
+var dataSet = [
+    [ "<a href='https://leetcode.com/problems/insert-into-a-binary-search-tree/' target='_blank'>insert-into-a-binary-search-tree</a>", "10", "2", "2010/03/25 10:00:00", "13 min 12 sec", "35 min 43 sec", "15 min 10 sec", "25 min 10 sec" ],
+    [ "<a href='https://leetcode.com/problems/minimum-ascii-delete-sum-for-two-strings/' target='_blank'>minimum-ascii-delete-sum-for-two-strings</a>", "1", "5", "2011/07/25 10:00:00", "3 min 12 sec", "25 min 43 sec", "5 min 10 sec", "4 min 10 sec" ]
+];
+ 
+$(document).ready(function() {
+    $('#example').DataTable( {
+        data: dataSet,
+        columns: [
+            { title: "Problem" },
+            { title: "Accepted" },
+            { title: "Rejected" },
+            { title: "Last Accepted" },
+            { title: "Best" },
+            { title: "Worst" },
+            { title: "Average" },
+            { title: "Users Average" }
+        ]
+    } );
+} );
+</script>
+</body>
+
+<footer>
+<p>2020 LorenzoBe</p>
+<p>GitHub Repository: <a href="https://github.com/LorenzoBe/LeetPlug" target="_blank">https://github.com/LorenzoBe/LeetPlug</a></p>
+</footer>
+
+</html>

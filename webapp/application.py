@@ -134,3 +134,12 @@ def eventsFunction():
         return 'Request succeded.', 202
     
     return 'Request unsupported.', 500
+
+@app.route('/')
+def root():
+    username = request.args.get('username', type = int)
+
+    if (username == None):
+        username = 1
+
+    return render_template('index.html', usernamePlaceholder = username)
