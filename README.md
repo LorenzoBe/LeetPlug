@@ -42,6 +42,12 @@ In my case I need access to the current browser tab and I want to execute a scri
 The **content_scripts** are executed when the page matches the defined pattern. In "js" element I defined the script to be executed as well as the JQuery library which I will use inside my logic.  
 Since the LeetCode page are mostly dynamic, I was not able to easily refer to internal elements. I had to create in the [problemsScript.js](src/problemsScript.js) file a function which polls the page until all the needed elements are created. Then I use JQuery to change the attributes to the elements, to hide some of them and show my control buttons. I also followed the same approach to add the timer inside the page, near the bottom-right Submit button.  
 
+### User registration and configuration
+The user registration is done just with the email address. The user is asked to provide it, then a request is done to the Application Server which will generate an ID and a KEY to be used for connecting. It will be sent by email.  
+The user must then insert the credentials in the proper fieldbox and store the configuration. But how to store it in a Chrome Extension? :D Luckily it seems to be very easy as per [this document](https://developer.chrome.com/extensions/storage).
+
+
+
 ### How to intercept the Submit requests
 To be able to track the user activity we need to intercept the Submit requests and the responses. Here the Chrome API sult come to help us! The main documentation is [here](https://developer.chrome.com/extensions/webRequest).
 

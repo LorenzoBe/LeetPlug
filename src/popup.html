@@ -1,11 +1,41 @@
 <!doctype html>
 <html>
   <head>
-    <title>Test Extension</title>
     <script src="popup.js"></script>
+    <style>
+      table, th, td {
+        border: 0px;
+      }
+    </style>
   </head>
   <body>
-    <h1>LeetCode loader</h1>
-    <button id="loadPage">GO!</button>
+    <h1>LeetPlug</h1>
+    Please insert the email address:<br/>
+    <table>
+      <tr>
+          <td>Email:</td>
+          <td><input id="txtEmail" /></td>
+      </tr>
+      <tr>
+          <td>Confirm Email:</td>
+          <td><input id="txtConfirmEmail" /></td>
+      </tr>
+      <tr>
+          <td></td>
+          <td style="text-align: right"><input type="button" id="btnSubmit" value="Submit"/></td>
+      </tr>
+      <tr>
+        <td>User ID:</td>
+        <td><input id="txtUserId" /></td>
+      </tr>
+      <tr>
+          <td>User Key:</td>
+          <td><input id="txtUserKey" /></td>
+      </tr>
+      <tr>
+        <td><input type="button" id="btnCancel" value="Cancel"/></td>
+        <td style="text-align: right"><input type="button" id="btnSave" value="Save"/></td>
+    </tr>
+  </table>
   </body>
 </html>

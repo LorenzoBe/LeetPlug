@@ -3,6 +3,7 @@ from email_validator import validate_email, EmailNotValidError
 from flask import Flask
 from flask import render_template
 from flask import request
+from flask_cors import CORS
 from flask_httpauth import HTTPBasicAuth
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -15,6 +16,7 @@ from storage import Storage
 from gmailHelper import EmailHelper
 
 app = Flask(__name__)
+CORS(app)
 auth = HTTPBasicAuth()
 config = ConfigParser()
 config.read('config.ini')
@@ -45,13 +47,13 @@ def usersRequestFilter() -> str:
 
     return email
 
-@app.route('/users', methods = ['PUT'])
+@app.route('/users', methods = ['GET'])
 @auth.login_required
 @limiter.limit("1000/day")
 @limiter.limit("100/hour")
 @limiter.limit("1/minute", key_func=usersRequestFilter)
 def usersFunction():
-    if request.method == 'PUT':
+    if request.method == 'GET':
         email = usersRequestFilter()
 
         # TODO: add a better validation here
@@ -72,10 +74,10 @@ def usersFunction():
         }
 
         if not storage.upsertUser(newUser):
-            return 'Request failed. Insert failed.', 500
+            return 'Request failed. Email invalid or already in use.', 409
 
         emailHelper.send(email, 'Account activated', 'UserID: {}\nUserKey: {}'.format(userId, userKey), "<b>Enjoy!</b>")
-        return 'Request succeded.', 202
+        return 'Request succeded. Check the email inbox.', 202
 
     return 'Request unsupported.', 500
 
