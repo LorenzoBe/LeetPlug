@@ -90,12 +90,12 @@ def eventsRequestFilter() -> str:
 
     return userKey
 
-@app.route('/events', methods = ['PUT'])
+@app.route('/events', methods = ['GET'])
 @auth.login_required
 @limiter.limit("1000/hour")
 @limiter.limit("1/second", key_func=eventsRequestFilter)
 def eventsFunction():
-    if request.method == 'PUT':
+    if request.method == 'GET':
         userId = request.args.get('id', default=0, type = int)
         userKey = eventsRequestFilter()
         problem = request.args.get('problem', default='', type = str)
@@ -103,10 +103,11 @@ def eventsFunction():
         session = request.args.get('session', default='', type = str)
         eventDescription = {'id': session, 'time': int(time.time())}
 
+        print('id:{} key:{}'.format(userId, userKey))
         user = storage.getUser(userId=userId, userKey=userKey)
-        if len(user) != 1: return 'Request failed. User issue.', 500
+        if len(user) != 1: return 'Request failed. User issue.', 501
         if userKey != user[0]['key']:
-            return 'Request failed. User issue.', 500
+            return 'Request failed. User issue.', 502
 
         problemId = '{}:{}'.format(userId, problem)
         problems = storage.getProblems(userId, problemId)
@@ -123,7 +124,7 @@ def eventsFunction():
             newProblem['events'][event].append(eventDescription)
 
             if not storage.insertProblem(newProblem):
-                return 'Request failed. Insert issue.', 500
+                return 'Request failed. Insert issue.', 503
         else:
             # update
             newProblem = problems[0]
@@ -132,11 +133,11 @@ def eventsFunction():
             newProblem['events'][event].append(eventDescription)
 
             if not storage.insertProblem(newProblem, etag=newProblem['_etag']):
-                return 'Request failed. Insert issue.', 500
+                return 'Request failed. Insert issue.', 504
 
         return 'Request succeded.', 202
     
-    return 'Request unsupported.', 500
+    return 'Request unsupported.', 505
 
 @app.route('/')
 def root():

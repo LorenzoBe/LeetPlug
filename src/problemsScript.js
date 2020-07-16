@@ -6,6 +6,8 @@ var problemDescriptionElement = "[data-key='description-content']";
 var codingPanelElement = ".content__Ztw-";
 var runCodeButton = "[data-cy='run-code-btn']";
 var resetCodeButton = ".reset-code-btn__3ADT";
+// TODO: move this in some smarter place
+var webAppURL = "http://127.0.0.1:5000";
 
 var customControlButtons = `
 <div id='controlButtons'>
@@ -52,6 +54,20 @@ var timerStyle = `
 `
 // Globals
 var sec = 0;
+var userId = "";
+var userKey = "";
+var pageURL = window.location.href;
+var currentProblem = getProblem();
+var session = Date.now();
+
+// Sync from chrome storage
+chrome.storage.sync.get(['userId', 'userKey'], function(result) {
+    console.log(result);
+    if (!(typeof result.userId === 'undefined'))
+      userId = result.userId;
+    if (!(typeof result.userKey === 'undefined'))
+      userKey = result.userKey;
+});
 
 // JQuery helper to check for an attribute existence
 $.fn.hasAttribute = function(name) {
@@ -81,6 +97,33 @@ function showAll() {
     $(codingPanelElement).attr("style", "visibility: visible;");
 }
 
+function sendProblemEvent(problem, event, session) {
+    console.log('Info: ' + userId + " " + userKey);
+    if (userId == "" || userKey == "") return;
+
+    const req = new XMLHttpRequest();
+    let url = new URL(webAppURL + '/events');
+    url.searchParams.set('id', userId);
+    url.searchParams.set('key', userKey);
+    url.searchParams.set('problem', problem);
+    url.searchParams.set('event', event);
+    url.searchParams.set('session', session);
+    console.log('Sending message to: ' + url);
+
+    req.open("GET", url, true)
+    req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    req.send();
+}
+
+function getProblem() {
+    var tokens = pageURL.split("/");
+
+    if (tokens.length >= 2)
+        return tokens[tokens.length - 2];
+
+    return "NA"
+}
+
 function onLoadPage (evt) {
     // insert the styles for the custom components
     var styleSheet = document.createElement("style")
@@ -107,11 +150,13 @@ function onLoadPage (evt) {
                 } else {
                     showAll();
                     startTimer();
+                    sendProblemEvent(currentProblem, "start", session);
                 }
             });
             $("#showProblemNoTimer").click(function(e) {
                 showAll();
                 hideTimer();
+                sendProblemEvent(currentProblem, "start", session);
             });
         }
         // check if the coding panel has been created
