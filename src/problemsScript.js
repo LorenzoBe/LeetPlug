@@ -6,8 +6,6 @@ var problemDescriptionElement = "[data-key='description-content']";
 var codingPanelElement = ".content__Ztw-";
 var runCodeButton = "[data-cy='run-code-btn']";
 var resetCodeButton = ".reset-code-btn__3ADT";
-// TODO: move this in some smarter place
-var webAppURL = "http://127.0.0.1:5000";
 
 var customControlButtons = `
 <div id='controlButtons'>
@@ -59,14 +57,19 @@ var userKey = "";
 var pageURL = window.location.href;
 var currentProblem = getProblem();
 var session = Date.now();
+var webAppURL = "";
+var webAppBasic = "";
 
 // Sync from chrome storage
-chrome.storage.sync.get(['userId', 'userKey'], function(result) {
-    console.log(result);
+chrome.storage.sync.get(['userId', 'userKey', 'webAppURL', 'webAppBasic'], function(result) {
     if (!(typeof result.userId === 'undefined'))
-      userId = result.userId;
+        userId = result.userId;
     if (!(typeof result.userKey === 'undefined'))
-      userKey = result.userKey;
+        userKey = result.userKey;
+    if (!(typeof result.webAppURL === 'undefined'))
+        webAppURL = result.webAppURL;
+    if (!(typeof result.webAppBasic === 'undefined'))
+        webAppBasic = result.webAppBasic;
 });
 
 // JQuery helper to check for an attribute existence
@@ -111,6 +114,7 @@ function sendProblemEvent(problem, event, session) {
     console.log('Sending message to: ' + url);
 
     req.open("GET", url, true)
+    req.setRequestHeader('Authorization', webAppBasic);
     req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     req.send();
 }

@@ -1,3 +1,7 @@
+// Globals
+var webAppURL = "";
+var webAppBasic = "";
+
 function validateEmail(email) {
   const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   return re.test(email);
@@ -5,10 +9,11 @@ function validateEmail(email) {
 
 function requestUserKey(email) {
   const req = new XMLHttpRequest();
-  let url = new URL('http://127.0.0.1:5000/users');
+  let url = new URL(webAppURL + '/users');
   url.searchParams.set('email', email);
 
   req.open("GET", url, true)
+  req.setRequestHeader('Authorization', webAppBasic);
   req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
   req.send();
 
@@ -32,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
   var cancelButton = document.getElementById('btnCancel');
   var saveButton = document.getElementById('btnSave');
 
-  chrome.storage.sync.get(['email', 'userId', 'userKey'], function(result) {
+  chrome.storage.sync.get(['email', 'userId', 'userKey', 'webAppURL', 'webAppBasic'], function(result) {
     if (!(typeof result.email === 'undefined'))
       emailTB.value = result.email;
     if (!(typeof result.email === 'undefined'))
@@ -41,6 +46,10 @@ document.addEventListener('DOMContentLoaded', function() {
       userIdTB.value = result.userId;
     if (!(typeof result.userKey === 'undefined'))
       userKeyTB.value = result.userKey;
+    if (!(typeof result.webAppURL === 'undefined'))
+      webAppURL = result.webAppURL;
+    if (!(typeof result.webAppBasic === 'undefined'))
+      webAppBasic = result.webAppBasic;
   });
 
   // BUTTON LISTENERS

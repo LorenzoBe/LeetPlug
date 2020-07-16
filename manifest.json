@@ -12,6 +12,11 @@
 
     "permissions": ["activeTab", "storage", "http://127.0.0.1:5000/*"],
 
+    "background": {
+        "scripts": ["src/background.js"],
+        "persistent": false
+    },
+
     "content_scripts": [
     {
         "matches": ["https://leetcode.com/problems/*"],
