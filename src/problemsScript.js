@@ -93,16 +93,54 @@ $.fn.hasAttribute = function(name) {
 }
 
 // Timer functions
+var startTime;
+var updatedTime;
+var difference;
+var tInterval;
+var savedTime;
+var running = 0;
+
 function pad ( val ) {
     return val > 9 ? val : "0" + val;
 }
-function updateTimer() {
-    ++sec;
-    $("#timer").html(pad(parseInt(sec/60,10)) + " Minutes " + pad(sec%60) + " Seconds");
+
+function startTimer(){
+    if(!running){
+      startTime = new Date().getTime();
+      tInterval = setInterval(getShowTime, 1000);
+      paused = 0;
+      running = 1;
+    }
 }
-function startTimer() {
-    var updateTimerInterval = setInterval (updateTimer, 1000);
+
+function pauseTimer(){
+    if (difference && !paused) {
+        clearInterval(tInterval);
+        savedTime = difference;
+        paused = 1;
+        running = 0;
+    } else {
+        startTimer();
+    }
 }
+
+// Thanks to https://medium.com/@olinations/stopwatch-script-that-keeps-accurate-time-a9b78f750b33
+// for the nice timer :D
+function getShowTime(){
+    updatedTime = new Date().getTime();
+    if (savedTime){
+        difference = (updatedTime - startTime) + savedTime;
+    } else {
+        difference =  updatedTime - startTime;
+    }
+
+    var hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    var minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+    var seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+    $("#timer").html(pad(hours) + " Hours " + pad(minutes) + " Minutes " + pad(seconds) + " Seconds");
+}
+
 function hideTimer() {
     $("#timer").attr("style", "display: none;");
 }
@@ -166,6 +204,7 @@ function onLoadPage (evt) {
             if ($(this).parent('[class*=result__]').length) {
                 clearInterval(jsSubmissionChecktimer);
                 console.log("SUCCESS");
+                pauseTimer();
                 sendProblemEvent(currentProblem, "result_ok", session);
             }
         });
@@ -221,7 +260,7 @@ function onLoadPage (evt) {
             $(codeAreaElement).children(codingPanelElement).attr("style", "visibility: hidden;");
 
             // add the timer near the submission buttons
-            $('<label id="timer" class="timer_style">00 Minutes 00 Seconds</label>').insertBefore($(runCodeButton))
+            $('<label id="timer" class="timer_style">00 Hours 00 Minutes 00 Seconds</label>').insertBefore($(runCodeButton))
 
             $(submitCodeButton).click(function(e) {
                 console.log("SUBMIT");
