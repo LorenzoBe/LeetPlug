@@ -3,8 +3,11 @@ window.addEventListener("load", onLoadPage, false);
 
 // Configuration consts
 var problemDescriptionElement = "[data-key='description-content']";
+var submissionSuccessElement = "[class*='success__']";
+var submissionErrorElement = "[class*='error__']";
 var codingPanelElement = ".content__Ztw-";
 var runCodeButton = "[data-cy='run-code-btn']";
+var submitCodeButton = "[data-cy='submit-code-btn']";
 var resetCodeButton = ".reset-code-btn__3ADT";
 
 var customControlButtons = `
@@ -59,6 +62,7 @@ var currentProblem = getProblem();
 var session = Date.now();
 var webAppURL = "";
 var webAppBasic = "";
+var jsSubmissionChecktimer;
 
 // Sync from chrome storage
 chrome.storage.sync.get(['userId', 'userKey', 'webAppURL', 'webAppBasic'], function(result) {
@@ -135,6 +139,16 @@ function onLoadPage (evt) {
     styleSheet.innerText = timerStyle
     document.head.appendChild(styleSheet)
 
+    function checkForSubmitComplete () {
+        if ($(submissionSuccessElement).length) {
+            console.log("SUCCESS");
+            clearInterval(jsSubmissionChecktimer);
+        } else if ($(submissionErrorElement).length && $(submissionErrorElement).parent('.result__23wN').length) {
+            console.log("ERROR");
+            clearInterval(jsSubmissionChecktimer);
+        }
+    }
+
     // this function will be called in a loop to wait for dynamic elements creation
     function checkForJSLoadComplete () {
         // check if the problem description element has been created
@@ -172,6 +186,12 @@ function onLoadPage (evt) {
 
             // add the timer near the submission buttons
             $('<label id="timer" class="timer_style">00 Minutes 00 Seconds</label>').insertBefore($(runCodeButton))
+
+            $(submitCodeButton).click(function(e) {
+                console.log("SUBMIT");
+
+                jsSubmissionChecktimer = setInterval(checkForSubmitComplete, 200);
+            });
         }
         // check if all the required elements have been found
         if ($(problemDescriptionElement).length && $(codingPanelElement).length) {
