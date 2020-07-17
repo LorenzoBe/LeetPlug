@@ -154,13 +154,41 @@ def root():
     for problem in problems:
         problemJs = {}
         problemJs['Problem'] = problem['problem']
-        problemJs['Accepted'] = "1"
-        problemJs['Rejected'] = "2"
-        problemJs['Last Accepted'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(problem['_ts']))
-        problemJs['Good'] = "3"
-        problemJs['Bad'] = "4"
-        problemJs['Ugly (Average)'] = "5"
-        problemJs['Users Average'] = "6"
+
+        starts = {}
+        results_ok = {}
+        results_ko = {}
+        lastAccepted = None
+        lastFinishTime = None
+
+        if 'start' in problem['events']:
+            for item in problem['events']['start']:
+                starts[item['id']] = item['time']
+
+        if 'result_ko' in problem['events']:
+            for item in problem['events']['result_ko']:
+                results_ko[item['id']] = item['time']
+
+        if 'result_ok' in problem['events']:
+            for item in problem['events']['result_ok']:
+                results_ok[item['id']] = item['time']
+                lastAccepted = item['time']
+                lastFinishTime = lastAccepted - starts[item['id']]
+
+        problemJs['Rejected'] = len(results_ko)
+        problemJs['Accepted'] = len(results_ok)
+        if lastAccepted:
+            problemJs['Last Accepted'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(lastAccepted))
+            hours = int(lastFinishTime / 3600)
+            mins = int(lastFinishTime / 60 % 60)
+            secs = int(lastFinishTime % 60)
+
+            problemJs['Last Finish Time'] = '{:02} hours {:02} mins {:02} secs'.format(hours, mins, secs)
+        else:
+            problemJs['Last Accepted'] = "0"
+            problemJs['Last Finish Time'] = "NA"
+
+        problemJs['Users Finish Time'] = "NA"
 
         problemsForJs['problems'].append(problemJs)
 

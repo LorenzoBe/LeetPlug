@@ -3,9 +3,11 @@ window.addEventListener("load", onLoadPage, false);
 
 // Configuration consts
 var problemDescriptionElement = "[data-key='description-content']";
+var submissionResultElement = "[class*='result__']";
 var submissionSuccessElement = "[class*='success__']";
 var submissionErrorElement = "[class*='error__']";
-var codingPanelElement = ".content__Ztw-";
+var codeAreaElement = "[data-cy='code-area']";
+var codingPanelElement = "[class*='content__']";
 var runCodeButton = "[data-cy='run-code-btn']";
 var submitCodeButton = "[data-cy='submit-code-btn']";
 var resetCodeButton = "[class*='reset-code-btn__']";
@@ -13,6 +15,7 @@ var resetCodeButtonWarn = "[class*='reset-code-btn-warn__']";
 
 var customControlButtons = `
 <div id='controlButtons'>
+<p id="controlButtonsTitle" class="title_style">LeetPlug mask</p>
 <p id="controlButtonsText" class="text_style">Choose how to start the problem:</p>
 <p id="showProblemWithTimer" class="round_style">Show the problem with time tracking</p>
 <p id="showProblemNoTimer" class="round_style">Show the problem without time tracking</p>
@@ -29,6 +32,13 @@ var timerStyle = `
     font-weight: bold;
     padding: 5px;
     margin-right: 10px;
+}
+.title_style {
+    margin: 10;
+    text-align: center;
+    font-color: #FAFAFA;
+    font-weight: bold;
+    font-size: 150%;
 }
 .text_style {
     margin: 10;
@@ -98,13 +108,15 @@ function hideTimer() {
 
 // Show original hidden elements
 function showAll() {
+    $("#controlButtonsTitle").attr("style", "display: none;");
     $("#controlButtonsText").attr("style", "display: none;");
     $("#showProblemWithTimer").attr("style", "display: none;");
     $("#showProblemNoTimer").attr("style", "display: none;");
     $(problemDescriptionElement).attr("style", "display: visible;");
-    $(codingPanelElement).attr("style", "visibility: visible;");
+    $(codeAreaElement).children(codingPanelElement).attr("style", "visibility: visible;");
 }
 
+// Send the event related to the problem (start, submit) to the remote web service
 function sendProblemEvent(problem, event, session) {
     console.log('Info: ' + userId + " " + userKey);
     if (userId == "" || userKey == "") return;
@@ -124,36 +136,51 @@ function sendProblemEvent(problem, event, session) {
     req.send();
 }
 
+// Get the problem identifier from token of the URL
 function getProblem() {
     var tokens = pageURL.split("/");
 
-    if (tokens.length >= 2)
+    if (tokens.length >= 2 && tokens[tokens.length - 2] != 'submissions' && tokens[tokens.length - 2] != 'solution')
         return tokens[tokens.length - 2];
+    else if (tokens.length >= 3 && tokens[tokens.length - 3] != 'submissions' && tokens[tokens.length - 3] != 'solution')
+        return tokens[tokens.length - 3];
 
     return "NA"
 }
 
+// Main onLoadPage function, starts the cycles needed to discover the elements inside the page
+// and to attach listeners to them
 function onLoadPage (evt) {
+    var problemDescriptionFound = false;
+    var codingPanelFound = false;
     // insert the styles for the custom components
     var styleSheet = document.createElement("style")
     styleSheet.type = "text/css"
     styleSheet.innerText = timerStyle
     document.head.appendChild(styleSheet)
 
+    // This function can identify if the submit was completed and stop the polling cycle
     function checkForSubmitComplete () {
-        if ($(submissionSuccessElement).length) {
-            console.log("SUCCESS");
-            clearInterval(jsSubmissionChecktimer);
-        } else if ($(submissionErrorElement).length && $(submissionErrorElement).parent('.result__23wN').length) {
-            console.log("ERROR");
-            clearInterval(jsSubmissionChecktimer);
-        }
+        $(submissionSuccessElement).each(function( index ) {
+            if ($(this).parent('[class*=result__]').length) {
+                clearInterval(jsSubmissionChecktimer);
+                console.log("SUCCESS");
+                sendProblemEvent(currentProblem, "result_ok", session);
+            }
+        });
+        $(submissionErrorElement).each(function( index ) {
+            if ($(this).parent('[class*=result__]').length) {
+                clearInterval(jsSubmissionChecktimer);
+                console.log("ERROR");
+                sendProblemEvent(currentProblem, "result_ko", session);
+            }
+        });
     }
 
     // this function will be called in a loop to wait for dynamic elements creation
     function checkForJSLoadComplete () {
         // check if the problem description element has been created
-        if ($(problemDescriptionElement).length && !$(problemDescriptionElement).hasAttribute("style")) {
+        if ($(problemDescriptionElement).length && !problemDescriptionFound) {
             console.log('Problem description found');
             // hide the problem description
             // used "display" to free up the space and put the button instead
@@ -180,13 +207,17 @@ function onLoadPage (evt) {
                 hideTimer();
                 sendProblemEvent(currentProblem, "start", session);
             });
+
+            problemDescriptionFound = true;
         }
         // check if the coding panel has been created
-        if ($(codingPanelElement).length && !$(codingPanelElement).hasAttribute("style")) {
+        if ($(codeAreaElement).length &&
+            $(codeAreaElement).children(codingPanelElement).length &&
+            !codingPanelFound) {
             console.log('Problem coding frame found');
             // hide the coding panel
             // use "visibility" to keep the space in the layout
-            $(codingPanelElement).attr("style", "visibility: hidden;");
+            $(codeAreaElement).children(codingPanelElement).attr("style", "visibility: hidden;");
 
             // add the timer near the submission buttons
             $('<label id="timer" class="timer_style">00 Minutes 00 Seconds</label>').insertBefore($(runCodeButton))
@@ -196,9 +227,11 @@ function onLoadPage (evt) {
 
                 jsSubmissionChecktimer = setInterval(checkForSubmitComplete, 200);
             });
+
+            codingPanelFound = true;
         }
         // check if all the required elements have been found
-        if ($(problemDescriptionElement).length && $(codingPanelElement).length) {
+        if (problemDescriptionFound && codingPanelFound) {
             console.log('Found all the required elements. Disabling polling timer');
             // disable the loop which checks the page content
             clearInterval(jsInitChecktimer);

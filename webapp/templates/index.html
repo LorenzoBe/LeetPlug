@@ -20,6 +20,9 @@ body {
   width: 90%;
   margin: auto;
 }
+.right-aligned-cell {
+  text-align: right;
+}
 </style>
 </head>
 
@@ -39,13 +42,11 @@ var dataSet = [];
 for (var i = 0; i < problemsFromPy.problems.length; ++i) {
   var problem = [];
   problem.push(problemsFromPy.problems[i]['Problem']);
-  problem.push(problemsFromPy.problems[i]['Accepted']);
   problem.push(problemsFromPy.problems[i]['Rejected']);
+  problem.push(problemsFromPy.problems[i]['Accepted']);
   problem.push(problemsFromPy.problems[i]['Last Accepted']);
-  problem.push(problemsFromPy.problems[i]['Good']);
-  problem.push(problemsFromPy.problems[i]['Bad']);
-  problem.push(problemsFromPy.problems[i]['Ugly (Average)']);
-  problem.push(problemsFromPy.problems[i]['Users Average']);
+  problem.push(problemsFromPy.problems[i]['Last Finish Time']);
+  problem.push(problemsFromPy.problems[i]['Users Finish Time']);
 
   dataSet.push(problem);
 }
@@ -55,13 +56,21 @@ $(document).ready(function() {
         data: dataSet,
         columns: [
             { title: "Problem" },
-            { title: "Accepted" },
             { title: "Rejected" },
+            { title: "Accepted" },
             { title: "Last Accepted" },
-            { title: "Good" },
-            { title: "Bad" },
-            { title: "Ugly (Average)" },
-            { title: "Users Average" }
+            { title: "Last Finish Time" },
+            { title: "Users Finish Time" }
+        ],
+        columnDefs: [
+            { targets: [1, 2, 3, 4, 5], className: "right-aligned-cell" },
+            {
+              targets: [0],
+              data: null,
+              render: function ( data, type, row, meta ) {
+                return '<a href="https://leetcode.com/problems/' + data[0] + '" target="_blank">' + data[0] + '</a>';
+              }
+            }
         ]
     } );
 } );
