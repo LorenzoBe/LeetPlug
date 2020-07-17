@@ -8,7 +8,8 @@ var submissionErrorElement = "[class*='error__']";
 var codingPanelElement = ".content__Ztw-";
 var runCodeButton = "[data-cy='run-code-btn']";
 var submitCodeButton = "[data-cy='submit-code-btn']";
-var resetCodeButton = ".reset-code-btn__3ADT";
+var resetCodeButton = "[class*='reset-code-btn__']";
+var resetCodeButtonWarn = "[class*='reset-code-btn-warn__']";
 
 var customControlButtons = `
 <div id='controlButtons'>
@@ -165,6 +166,9 @@ function onLoadPage (evt) {
                 if ($(resetCodeButton)[0] !== undefined) {
                     // trigger the reset of the code
                     $(resetCodeButton)[0].click();
+                } else if ($(resetCodeButtonWarn)[1] !== undefined) {
+                    // trigger the reset of the code
+                    $(resetCodeButtonWarn)[1].click();
                 } else {
                     showAll();
                     startTimer();
