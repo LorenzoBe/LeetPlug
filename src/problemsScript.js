@@ -97,7 +97,8 @@ function pad ( val ) {
     return val > 9 ? val : "0" + val;
 }
 function updateTimer() {
-    $("#timer").html(pad(parseInt(sec/60,10)) + " Minutes " + pad(++sec%60) + " Seconds");
+    ++sec;
+    $("#timer").html(pad(parseInt(sec/60,10)) + " Minutes " + pad(sec%60) + " Seconds");
 }
 function startTimer() {
     var updateTimerInterval = setInterval (updateTimer, 1000);
@@ -123,17 +124,17 @@ function sendProblemEvent(problem, event, session) {
 
     const req = new XMLHttpRequest();
     let url = new URL(webAppURL + '/events');
-    url.searchParams.set('id', userId);
-    url.searchParams.set('key', userKey);
-    url.searchParams.set('problem', problem);
-    url.searchParams.set('event', event);
-    url.searchParams.set('session', session);
+    var formData = new FormData();
+    formData.append('id', userId);
+    formData.append('key', userKey);
+    formData.append('problem', problem);
+    formData.append('event', event);
+    formData.append('session', session);
     console.log('Sending message to: ' + url);
 
-    req.open("GET", url, true)
+    req.open("POST", url, true)
     req.setRequestHeader('Authorization', webAppBasic);
-    req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    req.send();
+    req.send(formData);
 }
 
 // Get the problem identifier from token of the URL

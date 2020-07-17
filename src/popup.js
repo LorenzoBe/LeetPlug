@@ -10,12 +10,12 @@ function validateEmail(email) {
 function requestUserKey(email) {
   const req = new XMLHttpRequest();
   let url = new URL(webAppURL + '/users');
-  url.searchParams.set('email', email);
+  var formData = new FormData();
+  formData.append('email', email);
 
-  req.open("GET", url, true)
+  req.open("POST", url, true)
   req.setRequestHeader('Authorization', webAppBasic);
-  req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-  req.send();
+  req.send(formData);
 
   req.onreadystatechange = function() { // Call a function when the state changes.
     if (this.readyState === XMLHttpRequest.DONE) {

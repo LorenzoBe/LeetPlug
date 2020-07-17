@@ -40,49 +40,46 @@ def verify_password(username, password):
 
 def usersRequestFilter() -> str:
     try:
-        valid = validate_email(request.args.get('email', default='', type = str))
+        valid = validate_email(request.form.get('email', default='', type = str))
         email = valid.email
     except EmailNotValidError as e:
         return ''
 
     return email
 
-@app.route('/users', methods = ['GET'])
+@app.route('/users', methods = ['POST'])
 @auth.login_required
 @limiter.limit("1000/day")
 @limiter.limit("100/hour")
-@limiter.limit("1/minute", key_func=usersRequestFilter)
+@limiter.limit("10/minute", key_func=usersRequestFilter)
 def usersFunction():
-    if request.method == 'GET':
-        email = usersRequestFilter()
+    email = usersRequestFilter()
 
-        # TODO: add a better validation here
-        if email == '': return 'Request failed. Email missing.', 500
+    # TODO: add a better validation here
+    if email == '': return 'Request failed. Email missing.', 500
 
-        # generate the user incremental id
-        userId = storage.getNextCounter('userIdCounter')
-        if userId < 0: return 'Request failed. UserId invalid.', 500
+    # generate the user incremental id
+    userId = storage.getNextCounter('userIdCounter')
+    if userId < 0: return 'Request failed. UserId invalid.', 500
 
-        # generate the user key
-        userKey = str(uuid.uuid4())
+    # generate the user key
+    userKey = str(uuid.uuid4())
 
-        newUser = {
-            'id': email,
-            'email': email,
-            'userId': userId,
-            'key': userKey
-        }
+    newUser = {
+        'id': email,
+        'email': email,
+        'userId': userId,
+        'key': userKey
+    }
 
-        if not storage.upsertUser(newUser):
-            return 'Request failed. Email invalid or already in use.', 409
+    if not storage.upsertUser(newUser):
+        return 'Request failed. Email invalid or already in use.', 409
 
-        emailHelper.send(email, 'Account activated', 'UserID: {}\nUserKey: {}'.format(userId, userKey), "<b>Enjoy!</b>")
-        return 'Request succeded. Check the email inbox.', 202
-
-    return 'Request unsupported.', 500
+    emailHelper.send(email, 'Account activated', 'UserID: {}\nUserKey: {}'.format(userId, userKey), "<b>Enjoy!</b>")
+    return 'Request succeded. Check the email inbox.', 202
 
 def eventsRequestFilter() -> str:
-    userKey = request.args.get('key', default='', type = str)
+    userKey = request.form.get('key', default='', type = str)
     try:
         key = uuid.UUID(userKey, version=4)
     except ValueError:
@@ -90,61 +87,58 @@ def eventsRequestFilter() -> str:
 
     return userKey
 
-@app.route('/events', methods = ['GET'])
+@app.route('/events', methods = ['POST'])
 @auth.login_required
 @limiter.limit("1000/hour")
 @limiter.limit("1/second", key_func=eventsRequestFilter)
 def eventsFunction():
-    if request.method == 'GET':
-        userId = request.args.get('id', default=0, type = int)
-        userKey = eventsRequestFilter()
-        problem = request.args.get('problem', default='', type = str)
-        event = request.args.get('event', default='', type = str)
-        session = request.args.get('session', default='', type = str)
-        eventDescription = {'id': session, 'time': int(time.time())}
+    userId = request.form.get('id', default=0, type = int)
+    userKey = eventsRequestFilter()
+    problem = request.form.get('problem', default='', type = str)
+    event = request.form.get('event', default='', type = str)
+    session = request.form.get('session', default='', type = str)
+    eventDescription = {'id': session, 'time': int(time.time())}
 
-        print('id:{} key:{}'.format(userId, userKey))
-        user = storage.getUser(userId=userId, userKey=userKey)
-        if len(user) != 1: return 'Request failed. User issue.', 501
-        if userKey != user[0]['key']:
-            return 'Request failed. User issue.', 502
+    print('id:{} key:{}'.format(userId, userKey))
+    user = storage.getUser(userId=userId, userKey=userKey)
+    if len(user) != 1: return 'Request failed. User issue.', 501
+    if userKey != user[0]['key']:
+        return 'Request failed. User issue.', 502
 
-        problemId = '{}:{}'.format(userId, problem)
-        problems = storage.getProblems(userId, problemId)
-        if len(problems) == 0:
-            # first insert
-            newProblem = {
-                'id': problemId,
-                'userId': userId,
-                'problem': problem,
-                'events': {}
-            }
-            if not event in newProblem['events']:
-                newProblem['events'][event] = []
-            newProblem['events'][event].append(eventDescription)
+    problemId = '{}:{}'.format(userId, problem)
+    problems = storage.getProblems(userId, problemId)
+    if len(problems) == 0:
+        # first insert
+        newProblem = {
+            'id': problemId,
+            'userId': userId,
+            'problem': problem,
+            'events': {}
+        }
+        if not event in newProblem['events']:
+            newProblem['events'][event] = []
+        newProblem['events'][event].append(eventDescription)
 
-            if not storage.insertProblem(newProblem):
-                return 'Request failed. Insert issue.', 503
-        else:
-            # update
-            newProblem = problems[0]
-            if not event in newProblem['events']:
-                newProblem['events'][event] = []
-            newProblem['events'][event].append(eventDescription)
+        if not storage.insertProblem(newProblem):
+            return 'Request failed. Insert issue.', 503
+    else:
+        # update
+        newProblem = problems[0]
+        if not event in newProblem['events']:
+            newProblem['events'][event] = []
+        newProblem['events'][event].append(eventDescription)
 
-            if not storage.insertProblem(newProblem, etag=newProblem['_etag']):
-                return 'Request failed. Insert issue.', 504
+        if not storage.insertProblem(newProblem, etag=newProblem['_etag']):
+            return 'Request failed. Insert issue.', 504
 
-        return 'Request succeded.', 202
-    
-    return 'Request unsupported.', 505
+    return 'Request succeded.', 202
 
-@app.route('/')
+@app.route('/', methods = ['GET'])
 def root():
     userId = request.args.get('userId', type = int)
 
     if (userId == None):
-        userId = 57
+        userId = 0
 
     problems = storage.getProblems(userId, id=None)
     print(problems)
