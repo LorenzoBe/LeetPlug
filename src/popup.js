@@ -23,6 +23,8 @@ function requestUserKey(email) {
         alert(this.response);
       } else if (this.status === 409) {
         alert(this.response);
+      } else if (this.status >= 500) {
+        alert(this.response);
       }
     }
   }
@@ -34,7 +36,6 @@ document.addEventListener('DOMContentLoaded', function() {
   var submitButton = document.getElementById('btnSubmit');
   var userIdTB = document.getElementById("txtUserId");
   var userKeyTB = document.getElementById("txtUserKey");
-  var cancelButton = document.getElementById('btnCancel');
   var saveButton = document.getElementById('btnSave');
 
   chrome.storage.local.get(['email', 'userId', 'userKey', 'webAppURL', 'webAppBasic'], function(result) {
@@ -73,15 +74,17 @@ document.addEventListener('DOMContentLoaded', function() {
     requestUserKey(email)
   }, false);
 
-  cancelButton.addEventListener('click', function() {
-    window.close();
-  }, false);
-
   saveButton.addEventListener('click', function() {
     chrome.storage.local.set({'userId': userIdTB.value});
     chrome.storage.local.set({'userKey': userKeyTB.value});
-
     alert("Configuration complete, please try to access to LeetCode problems.");
+
     window.close();
   }, false);
+
+  window.addEventListener('blur', function() {
+    chrome.storage.local.set({'userId': userIdTB.value});
+    chrome.storage.local.set({'userKey': userKeyTB.value});
+  }, false);
+
 }, false);
