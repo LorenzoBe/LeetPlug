@@ -2,7 +2,7 @@
 <html>
 
 <head>
-<title>LeetPlug - Author: Lorenzo Bertelli</title>
+<title>LeetPlug</title>
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css">
 <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
 <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
@@ -23,13 +23,58 @@ body {
 .right-aligned-cell {
   text-align: right;
 }
+/* Add a black background color to the top navigation */
+.topnav {
+  width: 90%;
+  margin: auto;
+  background-color: #333;
+  overflow: hidden;
+}
+
+/* Style the links inside the navigation bar */
+.topnav a {
+  float: left;
+  color: #f2f2f2;
+  text-align: center;
+  vertical-align: middle;
+  padding: 16px 16px;
+  text-decoration: none;
+  font-size: 17px;
+}
+
+/* Change the color of links on hover */
+.topnav a:hover {
+  background-color: #ddd;
+  color: black;
+}
+
+/* Add a color to the active/current link */
+.topnav a.logo {
+  background-color: #FFFFFF;
+  padding: 0px 0px;
+  color: black;
+}
+.topnav a.donate {
+  background-color: #4CAF50;
+  color: white;
+}
 </style>
 </head>
 
 <body>
 <header>
-<h1 >LeetPlug</h1>
-User number: {{ userIdPlaceholder|safe }}
+<div class="topnav">
+  <a class="logo" href="/"><img src="static/images/fullBrain.png"></a>
+  <a href="/">HowTo</a>
+  <a href="https://github.com/LorenzoBe/LeetPlug" target="_blank">GitHub</a>
+  <a href="mailto:leetplug@gmail.com">Contacts</a>
+  <a class="donate" href="https://paypal.me/leetplug" target="_blank">Donate</a>
+</div>
+<p>
+  <form action="/data" method="GET">
+    <b style="padding-right: 0.3cm;">User ID:</b><input id="userId" name="userId" type="text" size=100 placeholder="Type here your userId"/>
+  </form>
+</p>
 </header>
 <div id="table_container">
 <table id="example" class="display" width="100%"></table>
@@ -96,7 +141,7 @@ $(document).ready(function() {
 
 <footer>
 <p>2020 LorenzoBe</p>
-<p>GitHub Repository: <a href="https://github.com/LorenzoBe/LeetPlug" target="_blank">https://github.com/LorenzoBe/LeetPlug</a></p>
+<p>Star me if you like: <a href="https://github.com/LorenzoBe/LeetPlug" target="_blank">https://github.com/LorenzoBe/LeetPlug</a></p>
 <!-- Default Statcounter code for Leetplug.azurewebsites.net
 https://leetplug.azurewebsites.net -->
 <script type="text/javascript">
@@ -115,6 +160,7 @@ https://leetplug.azurewebsites.net -->
   src="https://c.statcounter.com/12360703/0/6c27e02c/0/"
   alt="Web Analytics"></a></div></noscript>
   <!-- End of Statcounter Code -->
+  <div style="font-size: 50%; text-align: center;">Icons made by <a href="https://www.flaticon.com/authors/freepik" title="Freepik" target="_blank">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon" target="_blank">www.flaticon.com</a></div>
 </footer>
 
 </html>

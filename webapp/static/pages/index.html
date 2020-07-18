@@ -1,0 +1,130 @@
+<!doctype html>
+<html>
+
+<head>
+<title>LeetPlug</title>
+<style>
+header {
+  text-align: center;
+}
+footer {
+  text-align: center;
+}
+body {
+  background-color: rgb(255, 255, 255);
+}
+#text_container {
+  width: 70%;
+  margin: auto;
+  text-align: justify;
+  padding-top: 1cm;
+  padding-bottom: 0.5cm;
+}
+#form_container {
+  text-align: center;
+  padding-bottom: 0.5cm;
+}
+/* Add a black background color to the top navigation */
+.topnav {
+  width: 90%;
+  margin: auto;
+  background-color: #333;
+  overflow: hidden;
+}
+
+/* Style the links inside the navigation bar */
+.topnav a {
+  float: left;
+  color: #f2f2f2;
+  text-align: center;
+  vertical-align: middle;
+  padding: 16px 16px;
+  text-decoration: none;
+  font-size: 17px;
+}
+
+/* Change the color of links on hover */
+.topnav a:hover {
+  background-color: #ddd;
+  color: black;
+}
+
+/* Add a color to the active/current link */
+.topnav a.logo {
+  background-color: #FFFFFF;
+  padding: 0px 0px;
+  color: black;
+}
+.topnav a.donate {
+  background-color: #4CAF50;
+  color: white;
+}
+</style>
+</head>
+
+<body>
+<header>
+<div class="topnav">
+  <a class="logo" href="/"><img src="static/images/fullBrain.png"></a>
+  <a href="/">HowTo</a>
+  <a href="https://github.com/LorenzoBe/LeetPlug" target="_blank">GitHub</a>
+  <a href="mailto:leetplug@gmail.com">Contacts</a>
+  <a class="donate" href="https://paypal.me/leetplug" target="_blank">Donate</a>
+</div>
+</header>
+<div id="text_container">
+<p>
+<h2 style="text-align: center;">The only site able to track your LeetCode learning activity and progresses</h2>
+Install the Chrome extension LeetPlug to enable the main features totally integrated with the LeetCode site.<br>
+<b>Disclaimer: this is not a LeetCode product and it is not officially supported by LeetCode site. It is a separated project which uses the data publicy available on the user browser.</b><br>
+</p>
+<p>
+Main features:
+<ul>
+  <li>Automatic hiding of the LeetCode problem description: you just need to see them when you are ready</li>
+  <li>Integrated stopwatch: time is critical when solving an interview question. Keep an eye on it while you are solving the problem.</li>
+  <li>Problem submission tracking, along with the time spent to solve a question: continue to improve your skills lowering the time you spent on most difficult questions</li>
+  <li>Last successful timestamp tracking, to be able to refresh the problems which you are not solving since long time</li>
+</ul>
+</p>
+<p>
+The target of this site is to provide an easy way to LeetCode users to keep track of most difficult questions. If you keep track of the time spent to solve all the questions you can easily sort them and then periodically solve the most critical ones.<br>
+</p>
+<p>
+This is an independent project totally open source. I need your help to improve and to maintain it. <a href="https://paypal.me/leetplug" target="_blank">If you find it useful please donate</a> and you will help to cover the expenses to keep the site up and running!
+</p>
+</div>
+<div id="form_container">
+<p>
+  <form action="/data" method="GET">
+    <b style="padding-right: 0.3cm;">User ID:</b><input id="userId" name="userId" type="text" size=100 placeholder="Type here your userId"/>
+  </form>
+</p>
+</div>
+</body>
+
+<footer>
+<p>2020 LorenzoBe</p>
+<p>Star me if you like: <a href="https://github.com/LorenzoBe/LeetPlug" target="_blank">https://github.com/LorenzoBe/LeetPlug</a></p>
+<!-- Default Statcounter code for Leetplug.azurewebsites.net
+https://leetplug.azurewebsites.net -->
+<script type="text/javascript">
+  var sc_project=12360703; 
+  var sc_invisible=0; 
+  var sc_security="6c27e02c"; 
+  var sc_https=1; 
+  var scJsHost = "https://";
+  document.write("<sc"+"ript type='text/javascript' src='" +
+  scJsHost+
+  "statcounter.com/counter/counter.js'></"+"script>");
+  </script>
+  <noscript><div class="statcounter"><a title="Web Analytics"
+  href="https://statcounter.com/" target="_blank"><img
+  class="statcounter"
+  src="https://c.statcounter.com/12360703/0/6c27e02c/0/"
+  alt="Web Analytics"></a></div></noscript>
+  <!-- End of Statcounter Code -->
+  <div style="font-size: 50%; text-align: center;">Icons made by <a href="https://www.flaticon.com/authors/freepik" title="Freepik" target="_blank">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon" target="_blank">www.flaticon.com</a></div>
+</footer>
+
+</html>

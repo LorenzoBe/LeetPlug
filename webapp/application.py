@@ -155,8 +155,12 @@ def eventsFunction():
 # *********************************************************************************************
 # WEBSITE RENDERING ENDPOINT
 # *********************************************************************************************
-@app.route('/', methods = ['GET'])
+@app.route('/')
 def root():
+    return app.send_static_file('pages/index.html')
+
+@app.route('/data', methods = ['GET'])
+def data():
     userId = request.args.get('userId', type = int)
 
     if (userId == None):
@@ -213,4 +217,4 @@ def root():
         problemsForJs['problems'].append(problemJs)
 
     # inject the JSON representation of the problems into the page and return it
-    return render_template('index.html', problems=json.dumps(problemsForJs), userIdPlaceholder = userId)
+    return render_template('data.html', problems=json.dumps(problemsForJs), userIdPlaceholder = userId)
