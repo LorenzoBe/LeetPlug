@@ -49,7 +49,7 @@ class Storage():
 
         return True
 
-    def getUsersIterators(self, userId=None, userKey=None):
+    def getUsersIterators(self, userId=None, userKey=None, email=None):
         if userId and userKey:
             items = self.users.query_items(
                 query='SELECT * FROM c WHERE c.userId=@userId AND c.key=@userKey',
@@ -72,14 +72,21 @@ class Storage():
                     dict(name='@userKey', value=userKey)
                 ],
                 enable_cross_partition_query=True)
+        elif email:
+            items = self.users.query_items(
+                query='SELECT * FROM c WHERE c.email=@email',
+                parameters=[
+                    dict(name='@email', value=email)
+                ],
+                enable_cross_partition_query=True)
         else:
             items = self.users.query_items(
                 query='SELECT * FROM c',
                 enable_cross_partition_query=True)
         return items
 
-    def getUser(self, userId: int, userKey: str) -> list:
-        return list(self.getUsersIterators(userId, userKey))
+    def getUser(self, userId: int=None, userKey: str=None, email: str=None) -> list:
+        return list(self.getUsersIterators(userId, userKey, email))
 
     def getUsers(self) -> list:
         return list(self.getUsersIterators())

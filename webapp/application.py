@@ -60,8 +60,10 @@ def usersRequestFilter() -> str:
 def usersFunction():
     email = usersRequestFilter()
 
-    # TODO: add a better validation here
     if email == '': return 'Request failed. Email missing.', 500
+    # check if email already exists
+    user = storage.getUser(email=email)
+    if len(user) != 0: return 'Request failed. Email invalid or already in use.', 500
 
     # generate the user incremental id
     userId = storage.getNextCounter('userIdCounter')
@@ -111,7 +113,7 @@ def eventsFunction():
     eventDescription = {'id': session, 'time': int(time.time())}
 
     # get the current user details and reject the event if userKey doesn't match
-    user = storage.getUser(userId=userId, userKey=userKey)
+    user = storage.getUser(userId=userId, userKey=userKey, email=None)
     if len(user) != 1: return 'Request failed. User issue.', 500
     if userKey != user[0]['key']:
         return 'Request failed. User issue.', 500
