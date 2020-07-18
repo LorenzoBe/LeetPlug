@@ -40,7 +40,6 @@ def verify_password(username, password):
             check_password_hash(users.get(username), password):
         return username
 
-
 # *********************************************************************************************
 # USERS CREATION ENDPOINT
 # *********************************************************************************************
@@ -75,7 +74,9 @@ def usersFunction():
         'id': email,
         'email': email,
         'userId': userId,
-        'key': userKey
+        'key': userKey,
+        'created': int(time.time()),
+        'lastEvent': 0
     }
 
     if not storage.upsertUser(newUser):
@@ -109,12 +110,17 @@ def eventsFunction():
     session = request.form.get('session', default='', type = str)
     eventDescription = {'id': session, 'time': int(time.time())}
 
-    print('id:{} key:{}'.format(userId, userKey))
+    # get the current user details and reject the event if userKey doesn't match
     user = storage.getUser(userId=userId, userKey=userKey)
-    if len(user) != 1: return 'Request failed. User issue.', 501
+    if len(user) != 1: return 'Request failed. User issue.', 500
     if userKey != user[0]['key']:
-        return 'Request failed. User issue.', 502
+        return 'Request failed. User issue.', 500
+    # update the timestamp of last event of user
+    user[0]['lastEvent'] = eventDescription['time']
+    if not storage.upsertUser(user=user[0], etag=user[0]['_etag']):
+        return 'Request failed. User issue.', 500
 
+    # get and update the current problem document
     problemId = '{}:{}'.format(userId, problem)
     problems = storage.getProblems(userId, problemId)
     if len(problems) == 0:
@@ -131,7 +137,7 @@ def eventsFunction():
         newProblem['events'][event].append(eventDescription)
 
         if not storage.insertProblem(newProblem):
-            return 'Request failed. Insert issue.', 503
+            return 'Request failed. Insert issue.', 500
     else:
         # update
         newProblem = problems[0]
@@ -140,7 +146,7 @@ def eventsFunction():
         newProblem['events'][event].append(eventDescription)
 
         if not storage.insertProblem(newProblem, etag=newProblem['_etag']):
-            return 'Request failed. Insert issue.', 504
+            return 'Request failed. Insert issue.', 500
 
     return 'Request succeded.', 202
 
@@ -154,11 +160,11 @@ def root():
     if (userId == None):
         userId = 0
 
+    # get all the problems for the specified userId
     problems = storage.getProblems(userId, id=None)
-    print(problems)
 
+    # prepare the structure to be injected in the JavaScript
     problemsForJs = {'problems': []}
-
     for problem in problems:
         problemJs = {}
         problemJs['Problem'] = problem['problem']
@@ -204,4 +210,5 @@ def root():
 
         problemsForJs['problems'].append(problemJs)
 
+    # inject the JSON representation of the problems into the page and return it
     return render_template('index.html', problems=json.dumps(problemsForJs), userIdPlaceholder = userId)
