@@ -88,15 +88,19 @@ var jsSubmissionChecktimer;
 // Get information from background page (warning, this is totally async!)
 chrome.runtime.sendMessage({method: "getWebAppURL"}, function(response) {
     webAppURL = response.data;
+    //console.log(webAppURL)
 });
 chrome.runtime.sendMessage({method: "getWebAppBasic"}, function(response) {
     webAppBasic = response.data;
+    //console.log(webAppBasic)
 });
 chrome.runtime.sendMessage({method: "geUserId"}, function(response) {
     userId = response.data;
+    //console.log(userId)
 });
 chrome.runtime.sendMessage({method: "getUserKey"}, function(response) {
     userKey = response.data;
+    //console.log(userKey)
 });
 
 // JQuery helper to check for an attribute existence
