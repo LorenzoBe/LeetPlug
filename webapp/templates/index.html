@@ -42,6 +42,7 @@ var dataSet = [];
 for (var i = 0; i < problemsFromPy.problems.length; ++i) {
   var problem = [];
   problem.push(problemsFromPy.problems[i]['Problem']);
+  problem.push(problemsFromPy.problems[i]['Difficulty']);
   problem.push(problemsFromPy.problems[i]['Rejected']);
   problem.push(problemsFromPy.problems[i]['Accepted']);
   problem.push(problemsFromPy.problems[i]['Last Accepted']);
@@ -56,6 +57,7 @@ $(document).ready(function() {
         data: dataSet,
         columns: [
             { title: "Problem" },
+            { title: "Difficulty" },
             { title: "Rejected" },
             { title: "Accepted" },
             { title: "Last Accepted" },
@@ -63,12 +65,27 @@ $(document).ready(function() {
             { title: "Users Finish Time" }
         ],
         columnDefs: [
-            { targets: [1, 2, 3, 4, 5], className: "right-aligned-cell" },
+            { targets: [1], className: "dt-body-center" },
+            { targets: [2, 3, 4, 5, 6], className: "dt-body-right" },
             {
               targets: [0],
               data: null,
               render: function ( data, type, row, meta ) {
                 return '<a href="https://leetcode.com/problems/' + data[0] + '" target="_blank">' + data[0] + '</a>';
+              }
+            },
+            {
+              targets: [1],
+              data: null,
+              render: function ( data, type, row, meta ) {
+                if (data[1] == 'Easy')
+                  return '<span style="color:green;">Easy</span>';
+                else if (data[1] == 'Medium')
+                  return '<span style="color:orange;">Medium</span>';
+                else if (data[1] == 'Hard')
+                  return '<span style="color:red;">Hard</span>';
+                else
+                  return '';
               }
             }
         ]

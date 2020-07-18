@@ -2,18 +2,27 @@ console.log('Problems page intercepted');
 window.addEventListener("load", onLoadPage, false);
 
 // Configuration consts
-var problemDescriptionElement = "[data-key='description-content']";
-var submissionResultElement = "[class*='result__']";
-var submissionSuccessElement = "[class*='success__']";
-var submissionErrorElement = "[class*='error__']";
-var codeAreaElement = "[data-cy='code-area']";
-var codingPanelElement = "[class*='content__']";
-var runCodeButton = "[data-cy='run-code-btn']";
-var submitCodeButton = "[data-cy='submit-code-btn']";
-var resetCodeButton = "[class*='reset-code-btn__']";
-var resetCodeButtonWarn = "[class*='reset-code-btn-warn__']";
+const problemDescriptionElement = "[data-key='description-content']";
+const submissionResultElement = "[class*='result__']";
+const submissionSuccessElement = "[class*='success__']";
+const submissionErrorElement = "[class*='error__']";
+const codeAreaElement = "[data-cy='code-area']";
+const codingPanelElement = "[class*='content__']";
+const runCodeButton = "[data-cy='run-code-btn']";
+const submitCodeButton = "[data-cy='submit-code-btn']";
+const resetCodeButton = "[class*='reset-code-btn__']";
+const resetCodeButtonWarn = "[class*='reset-code-btn-warn__']";
+const questionTitleElement = "[data-cy='question-title']";
+const difficultyEasyElement = "[diff='easy']";
+const difficultyMediumElement = "[diff='medium']";
+const difficultyHardElement = "[diff='hard']";
 
-var customControlButtons = `
+const easyId = 1;
+const mediumId = 10;
+const hardId = 100;
+
+
+const customControlButtons = `
 <div id='controlButtons'>
 <p id="controlButtonsTitle" class="title_style">LeetPlug mask</p>
 <p id="controlButtonsText" class="text_style">Choose how to start the problem:</p>
@@ -70,6 +79,7 @@ var userId = "";
 var userKey = "";
 var pageURL = window.location.href;
 var currentProblem = getProblem();
+var problemDifficulty = 'Unknown';
 var session = Date.now();
 var webAppURL = "";
 var webAppBasic = "";
@@ -166,6 +176,7 @@ function sendProblemEvent(problem, event, session) {
     formData.append('id', userId);
     formData.append('key', userKey);
     formData.append('problem', problem);
+    formData.append('difficulty', problemDifficulty);
     formData.append('event', event);
     formData.append('session', session);
     console.log('Sending message to: ' + url);
@@ -185,6 +196,16 @@ function getProblem() {
         return tokens[tokens.length - 3];
 
     return "NA"
+}
+
+// Get the problem difficulty
+function getProblemDifficulty() {
+    if ($(questionTitleElement).parent().children().children(difficultyEasyElement).length)
+        return easyId;
+    if ($(questionTitleElement).parent().children().children(difficultyMediumElement).length)
+        return mediumId;
+    if ($(questionTitleElement).parent().children().children(difficultyHardElement).length)
+        return hardId;
 }
 
 // Main onLoadPage function, starts the cycles needed to discover the elements inside the page
@@ -275,6 +296,7 @@ function onLoadPage (evt) {
             console.log('Found all the required elements. Disabling polling timer');
             // disable the loop which checks the page content
             clearInterval(jsInitChecktimer);
+            problemDifficulty = getProblemDifficulty();
         }
     }
 

@@ -29,6 +29,8 @@ limiter = Limiter(
     key_func=get_remote_address
 )
 
+# GLOBALS
+difficulties = {0: 'Unknown', 1: 'Easy', 10: 'Medium', 100: 'Hard'}
 storage = Storage(config)
 emailHelper = EmailHelper(config)
 
@@ -95,6 +97,7 @@ def eventsFunction():
     userId = request.form.get('id', default=0, type = int)
     userKey = eventsRequestFilter()
     problem = request.form.get('problem', default='', type = str)
+    difficulty = request.form.get('difficulty', default=0, type = int)
     event = request.form.get('event', default='', type = str)
     session = request.form.get('session', default='', type = str)
     eventDescription = {'id': session, 'time': int(time.time())}
@@ -113,6 +116,7 @@ def eventsFunction():
             'id': problemId,
             'userId': userId,
             'problem': problem,
+            'difficulty': difficulty,
             'events': {}
         }
         if not event in newProblem['events']:
@@ -148,6 +152,10 @@ def root():
     for problem in problems:
         problemJs = {}
         problemJs['Problem'] = problem['problem']
+        if 'difficulty' in problem:
+            problemJs['Difficulty'] = difficulties[problem['difficulty']]
+        else:
+            problemJs['Difficulty'] = difficulties[0]
 
         starts = {}
         results_ok = {}
