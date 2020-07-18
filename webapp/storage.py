@@ -110,7 +110,7 @@ class Storage():
 
         return True
 
-    def getProblemsIterators(self, userId: int, id: str):
+    def getProblemsIterators(self, userId: int=None, id: str=None):
         if id:
             items = self.events.query_items(
                 query='SELECT * FROM c WHERE c.id=@id',
@@ -118,18 +118,23 @@ class Storage():
                     dict(name='@id', value=id)
                 ],
                 enable_cross_partition_query=True)
-        else:
+        elif userId:
             items = self.events.query_items(
                 query='SELECT * FROM c WHERE c.userId=@userId',
                 parameters=[
                     dict(name='@userId', value=userId)
                 ],
                 enable_cross_partition_query=True)
+        else:
+            items = self.events.query_items(
+                query='SELECT * FROM c',
+                enable_cross_partition_query=True)
+
         return items
 
-    def getProblems(self, userId: int, id: str) -> list:
-        return list(self.getProblemsIterators(userId, id=id))
+    def getProblems(self, userId: int=None, id: str=None) -> list:
+        return list(self.getProblemsIterators(userId=userId, id=id))
 
-    def deleteProblems(self, userId: int):
-        for item in self.getProblemsIterators(userId, id=None):
-            self.events.delete_item(item, partition_key=userId)
+    def deleteProblems(self, userId: int=None, id: str=None):
+        for item in self.getProblemsIterators(userId, id):
+            self.events.delete_item(item, partition_key=item['userId'])
