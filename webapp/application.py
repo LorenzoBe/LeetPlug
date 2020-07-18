@@ -33,6 +33,8 @@ limiter = Limiter(
 difficulties = {0: 'Unknown', 1: 'Easy', 10: 'Medium', 100: 'Hard'}
 storage = Storage(config)
 emailHelper = EmailHelper(config)
+emailBody = 'Dear LeetPlug User,\nthank you for registering.\nPlease insert the following credentials in the LeetPlug extension configuration popup.\n\n'
+emailHtml = '<b>User ID:</b> {}<br><b>UserKey:</b> {}<br><br>Enjoy and see you on the <a href="https://leetplug.azurewebsites.net">LeetPlug Official Website</a>!'
 
 @auth.verify_password
 def verify_password(username, password):
@@ -84,7 +86,7 @@ def usersFunction():
     if not storage.upsertUser(newUser):
         return 'Request failed. Email invalid or already in use.', 409
 
-    emailHelper.send(email, 'Account activated', 'UserID: {}\nUserKey: {}'.format(userId, userKey), "<b>Enjoy!</b>")
+    emailHelper.send(email, 'Account activated', emailBody, emailHtml.format(userId, userKey))
     return 'Request succeded. Check the email inbox.', 202
 
 # *********************************************************************************************
