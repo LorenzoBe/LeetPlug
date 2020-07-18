@@ -40,6 +40,10 @@ def verify_password(username, password):
             check_password_hash(users.get(username), password):
         return username
 
+
+# *********************************************************************************************
+# USERS CREATION ENDPOINT
+# *********************************************************************************************
 def usersRequestFilter() -> str:
     try:
         valid = validate_email(request.form.get('email', default='', type = str))
@@ -80,6 +84,9 @@ def usersFunction():
     emailHelper.send(email, 'Account activated', 'UserID: {}\nUserKey: {}'.format(userId, userKey), "<b>Enjoy!</b>")
     return 'Request succeded. Check the email inbox.', 202
 
+# *********************************************************************************************
+# PROBLEM EVENTS CREATION ENDPOINT
+# *********************************************************************************************
 def eventsRequestFilter() -> str:
     userKey = request.form.get('key', default='', type = str)
     try:
@@ -137,6 +144,9 @@ def eventsFunction():
 
     return 'Request succeded.', 202
 
+# *********************************************************************************************
+# WEBSITE RENDERING ENDPOINT
+# *********************************************************************************************
 @app.route('/', methods = ['GET'])
 def root():
     userId = request.args.get('userId', type = int)
