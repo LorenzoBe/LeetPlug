@@ -85,16 +85,18 @@ var webAppURL = "";
 var webAppBasic = "";
 var jsSubmissionChecktimer;
 
-// Sync from chrome storage
-chrome.storage.sync.get(['userId', 'userKey', 'webAppURL', 'webAppBasic'], function(result) {
-    if (!(typeof result.userId === 'undefined'))
-        userId = result.userId;
-    if (!(typeof result.userKey === 'undefined'))
-        userKey = result.userKey;
-    if (!(typeof result.webAppURL === 'undefined'))
-        webAppURL = result.webAppURL;
-    if (!(typeof result.webAppBasic === 'undefined'))
-        webAppBasic = result.webAppBasic;
+// Get information from background page (warning, this is totally async!)
+chrome.runtime.sendMessage({method: "getWebAppURL"}, function(response) {
+    webAppURL = response.data;
+});
+chrome.runtime.sendMessage({method: "getWebAppBasic"}, function(response) {
+    webAppBasic = response.data;
+});
+chrome.runtime.sendMessage({method: "geUserId"}, function(response) {
+    userId = response.data;
+});
+chrome.runtime.sendMessage({method: "getUserKey"}, function(response) {
+    userKey = response.data;
 });
 
 // JQuery helper to check for an attribute existence
