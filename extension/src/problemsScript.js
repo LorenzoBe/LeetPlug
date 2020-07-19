@@ -272,7 +272,7 @@ function onLoadPage (evt) {
             $("#showProblemNoTimer").click(function(e) {
                 showAll();
                 hideTimer();
-                sendProblemEvent(currentProblem, "start", session);
+                sendProblemEvent(currentProblem, "start_no_track", session);
             });
 
             problemDescriptionFound = true;

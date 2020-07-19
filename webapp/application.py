@@ -183,26 +183,28 @@ def data():
 
         starts = {}
         results_ok = {}
-        results_ko = {}
+
         lastAccepted = None
         lastFinishTime = None
+        problemJs['Rejected'] = 0
+        problemJs['Accepted'] = 0
 
         if 'start' in problem['events']:
             for item in problem['events']['start']:
                 starts[item['id']] = item['time']
 
         if 'result_ko' in problem['events']:
-            for item in problem['events']['result_ko']:
-                results_ko[item['id']] = item['time']
+            problemJs['Rejected'] = len(problem['events']['result_ko'])
 
         if 'result_ok' in problem['events']:
             for item in problem['events']['result_ok']:
-                results_ok[item['id']] = item['time']
-                lastAccepted = item['time']
-                lastFinishTime = lastAccepted - starts[item['id']]
+                # evaluate just the first successful submission for each session
+                if (not item['id'] in results_ok) and (item['id'] in starts):
+                    results_ok[item['id']] = item['time']
+                    lastAccepted = item['time']
+                    lastFinishTime = lastAccepted - starts[item['id']]
+            problemJs['Accepted'] = len(results_ok)
 
-        problemJs['Rejected'] = len(results_ko)
-        problemJs['Accepted'] = len(results_ok)
         if lastAccepted:
             problemJs['Last Accepted'] = lastAccepted
             hours = int(lastFinishTime / 3600)
@@ -211,7 +213,7 @@ def data():
 
             problemJs['Last Finish Time'] = '{:02} hours {:02} mins {:02} secs'.format(hours, mins, secs)
         else:
-            problemJs['Last Accepted'] = "0"
+            problemJs['Last Accepted'] = "NA"
             problemJs['Last Finish Time'] = "NA"
 
         problemJs['Users Finish Time'] = "NA"

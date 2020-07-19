@@ -90,8 +90,12 @@ for (var i = 0; i < problemsFromPy.problems.length; ++i) {
   problem.push(problemsFromPy.problems[i]['Difficulty']);
   problem.push(problemsFromPy.problems[i]['Rejected']);
   problem.push(problemsFromPy.problems[i]['Accepted']);
-  var lastAccepted = new Date(problemsFromPy.problems[i]['Last Accepted'] * 1000);
-  problem.push(lastAccepted.toString().split(' ', 5).join(' '));
+  if (problemsFromPy.problems[i]['Last Accepted'] != "NA") {
+    var lastAccepted = new Date(problemsFromPy.problems[i]['Last Accepted'] * 1000);
+    problem.push(lastAccepted.toString().split(' ', 5).join(' '));
+  } else {
+    problem.push("NA");
+  }
   problem.push(problemsFromPy.problems[i]['Last Finish Time']);
   problem.push(problemsFromPy.problems[i]['Users Finish Time']);
 
