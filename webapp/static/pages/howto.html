@@ -1,0 +1,158 @@
+<!doctype html>
+<html>
+
+<head>
+<title>LeetPlug</title>
+<style>
+header {
+  text-align: center;
+}
+footer {
+  text-align: center;
+}
+body {
+  background-color: rgb(255, 255, 255);
+}
+#text_container {
+  width: 70%;
+  margin: auto;
+  text-align: justify;
+  padding-top: 1cm;
+  padding-bottom: 0.5cm;
+}
+#form_container {
+  text-align: center;
+  padding-bottom: 0.5cm;
+}
+.center_img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
+  margin-top: 0.5cm;
+  margin-bottom: 0.5cm;
+  border: 2px solid #555;
+}
+/* Add a black background color to the top navigation */
+.topnav {
+  width: 90%;
+  margin: auto;
+  background-color: #333;
+  overflow: hidden;
+}
+
+/* Style the links inside the navigation bar */
+.topnav a {
+  float: left;
+  color: #f2f2f2;
+  text-align: center;
+  vertical-align: middle;
+  padding: 16px 16px;
+  text-decoration: none;
+  font-size: 17px;
+}
+
+/* Change the color of links on hover */
+.topnav a:hover {
+  background-color: #ddd;
+  color: black;
+}
+
+/* Add a color to the active/current link */
+.topnav a.logo {
+  background-color: #FFFFFF;
+  padding: 0px 0px;
+  color: black;
+}
+.topnav a.donate {
+  background-color: #4CAF50;
+  color: white;
+}
+</style>
+</head>
+
+<body>
+<header>
+<div class="topnav">
+  <a class="logo" href="/"><img src="/static/images/fullBrain.png"></a>
+  <a href="/static/pages/howto.html">HowTo</a>
+  <a href="https://github.com/LorenzoBe/LeetPlug" target="_blank">GitHub</a>
+  <a href="/static/pages/contacts.html">Contacts</a>
+  <a class="donate" href="https://paypal.me/leetplug" target="_blank">Donate</a>
+</div>
+</header>
+<div id="text_container">
+<p>
+<h2 style="text-align: center;">How To: get the maximum from LeetPlug</h2>
+Dear LeetPlug user, you can find below the instruction about how to install and activate your LeetPlug extension<br>
+<h3>Extension installation</h3>
+The extension is officially available on the <a href="https://chrome.google.com/webstore/category/extensions" target="_blank">Chrome Web Storage</a>. Just search for LeetPlug extension and install it.
+
+<h3>Extension configuration</h3>
+After the installation, the extension will be available in your browser. You can access to it with the button near the URL field.<br>
+<a href="/static/images/extensions_menu.png" target="_blank" ><img class="center_img" src="/static/images/extensions_menu.png" width="50%" height="50%"></a><br>
+To open the LeetPlug options, click on the extension icon. A popup similar to the following will appear:<br>
+<a href="/static/images/leetplug_options.png" target="_blank" ><img class="center_img" src="/static/images/leetplug_options.png" width="50%" height="50%"></a><br>
+Now you need to insert your email and press the <b>Submit</b> button. An email should be sent to the specified email address with the credentials needed to complete the configuration.<br>
+Please copy and paste the User Id and the User Key received by email inside the extension popup and you will be ready to use it at full power!<br>
+<b>NOTE: a restart of the Chrome browser could be necessary to allow the proper load of the configuration.</b>
+
+<h3>Extension usage</h3>
+Now you should be able to open any problem inside the <a href="https://leetcode.com/problemset/all/" target="_blank">https://leetcode.com/problemset/all/</a> problem set, ans see the extension in action.<br>
+The problem description is hidden and two buttons are displayed, allowing to start the exercise with the stopwatch visible or not in the lower-right corner.<br>
+<a href="/static/images/time_tracking_buttons.png" target="_blank" ><img class="center_img" src="/static/images/time_tracking_buttons.png" width="50%" height="50%"></a><br>
+
+When the selected problem already has some custom code in the solution panel and the user select to proceed with time tracking, the extension propose to reset the current code to start from a clean situation. It uses the LeetCode event, triggering the alert window:<br>
+<a href="/static/images/clear_confirmation.png" target="_blank" ><img class="center_img" src="/static/images/clear_confirmation.png" width="50%" height="50%"></a><br>
+If you confirm, the current code is wiped out and you need to click again on the LeetPlug selection button to start the exercise.<br>
+When a problem is started with the time tracking option, the stopwatch is started. The system trak all the submissions, including the failed ones, until the first acceped. All the record are sent to the remote server for later visualisation.
+
+<h3>Results page</h3>
+All the problems which has been started, rejected or successfully completed are tracked and set to the remote server. You can access to it throught this site, insertig your User Id in the following field:<br>
+<div id="form_container">
+  <p>
+    <form action="/data" method="GET">
+      <b style="padding-right: 0.3cm;">User ID:</b><input id="userId" name="userId" type="text" size=100 placeholder="Type here your userId"/>
+    </form>
+  </p>
+</div>
+An example of collected data is:
+<a href="/static/images/problems_table.png" target="_blank" ><img class="center_img" src="/static/images/problems_table.png" width="50%" height="50%"></a><br>
+
+The result table shows the data grouped by problem. Some of the main use cases are:
+<ul>
+  <li>Sort by <b>Last Accepted</b> to refresh the problems which you executed too long ago</li>
+  <li>Sort by <b>Last Finish Time</b> to improve your speed on critical problems</li>
+  <li>Sort by <b>Rejected</b> to refresh the problems where you had a lot of rejections before finding the proper solution</li>
+</ul>
+
+<h3>Enjoy</h3>
+I hope that this project will help you to improve and land in your dream job! We are all searching for something, keep running!
+
+</body>
+
+<footer>
+<p>2020 LorenzoBe</p>
+<p>Star me if you like: <a href="https://github.com/LorenzoBe/LeetPlug" target="_blank">https://github.com/LorenzoBe/LeetPlug</a></p>
+<!-- Default Statcounter code for Leetplug.azurewebsites.net
+https://leetplug.azurewebsites.net -->
+<script type="text/javascript">
+  var sc_project=12360703; 
+  var sc_invisible=0; 
+  var sc_security="6c27e02c"; 
+  var sc_https=1; 
+  var scJsHost = "https://";
+  document.write("<sc"+"ript type='text/javascript' src='" +
+  scJsHost+
+  "statcounter.com/counter/counter.js'></"+"script>");
+  </script>
+  <noscript><div class="statcounter"><a title="Web Analytics"
+  href="https://statcounter.com/" target="_blank"><img
+  class="statcounter"
+  src="https://c.statcounter.com/12360703/0/6c27e02c/0/"
+  alt="Web Analytics"></a></div></noscript>
+  <!-- End of Statcounter Code -->
+  <div style="font-size: 50%; text-align: center;">Icons made by <a href="https://www.flaticon.com/authors/freepik" title="Freepik" target="_blank">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon" target="_blank">www.flaticon.com</a></div>
+</footer>
+
+</html>
