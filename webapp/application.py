@@ -204,7 +204,7 @@ def data():
         problemJs['Rejected'] = len(results_ko)
         problemJs['Accepted'] = len(results_ok)
         if lastAccepted:
-            problemJs['Last Accepted'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(lastAccepted))
+            problemJs['Last Accepted'] = lastAccepted
             hours = int(lastFinishTime / 3600)
             mins = int(lastFinishTime / 60 % 60)
             secs = int(lastFinishTime % 60)
