@@ -9,14 +9,14 @@ var webAppBasic = 'Basic bG9yZW56bzp5YTU2Mm9zMw==';
 chrome.storage.local.set({'webAppURL': webAppURL});
 chrome.storage.local.set({'webAppBasic': webAppBasic});
 
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    chrome.storage.local.get(['userId', 'userKey'], function(result) {
-        if (!(typeof result.userId === 'undefined'))
-            userId = result.userId;
-        if (!(typeof result.userKey === 'undefined'))
-            userKey = result.userKey;
-    });
+chrome.storage.local.get(['userId', 'userKey'], function(result) {
+    if (!(typeof result.userId === 'undefined'))
+        userId = result.userId;
+    if (!(typeof result.userKey === 'undefined'))
+        userKey = result.userKey;
+});
 
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     if (request.method == "getWebAppURL")
         sendResponse({data: webAppURL});
     else if (request.method == "getWebAppBasic")
