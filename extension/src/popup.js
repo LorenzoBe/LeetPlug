@@ -37,6 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
   var userIdTB = document.getElementById("txtUserId");
   var userKeyTB = document.getElementById("txtUserKey");
   var saveButton = document.getElementById('btnSave');
+  var policyAgreeCB = document.getElementById("policyAgree");
 
   chrome.storage.local.get(['email', 'userId', 'userKey', 'webAppURL', 'webAppBasic'], function(result) {
     if (!(typeof result.email === 'undefined'))
@@ -67,6 +68,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // check if the emails are valid
     if (!validateEmail(email) || !validateEmail(confirmEmail)) {
       alert("Email is invalid.");
+      return;
+    }
+
+    // check if policy has been accepted
+    if (policyAgreeCB.checked != true) {
+      alert("Please agree with the LeetPlug Privacy and Security Policy, marking the checkbox.");
       return;
     }
 
