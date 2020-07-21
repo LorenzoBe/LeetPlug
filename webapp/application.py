@@ -184,12 +184,15 @@ def data():
         starts = {}
         results_ok = {}
 
+        addProblem = False
         lastAccepted = None
         lastFinishTime = None
         problemJs['Rejected'] = 0
         problemJs['Accepted'] = 0
 
         if 'start' in problem['events']:
+            # there is at least one request to track the problem
+            addProblem = True
             for item in problem['events']['start']:
                 starts[item['id']] = item['time']
 
@@ -218,7 +221,8 @@ def data():
 
         problemJs['Users Finish Time'] = "NA"
 
-        problemsForJs['problems'].append(problemJs)
+        if addProblem:
+            problemsForJs['problems'].append(problemJs)
 
     # inject the JSON representation of the problems into the page and return it
     return render_template('data.html', problems=json.dumps(problemsForJs), userIdPlaceholder = userId)
