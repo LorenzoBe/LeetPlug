@@ -54,6 +54,18 @@ document.addEventListener('DOMContentLoaded', function() {
       webAppBasic = result.webAppBasic;
   });
 
+  function triggerBackgroubdSync() {
+    chrome.runtime.sendMessage({method: "updateLocalVariables"}, function(response) {
+      // nothing to do here
+    });
+  }
+  
+  function storeCredentials() {
+    chrome.storage.local.set({'userId': userIdTB.value});
+    chrome.storage.local.set({'userKey': userKeyTB.value});
+    triggerBackgroubdSync();
+  }
+
   // BUTTON LISTENERS
   submitButton.addEventListener('click', function() {
     email = emailTB.value;
@@ -82,16 +94,14 @@ document.addEventListener('DOMContentLoaded', function() {
   }, false);
 
   saveButton.addEventListener('click', function() {
-    chrome.storage.local.set({'userId': userIdTB.value});
-    chrome.storage.local.set({'userKey': userKeyTB.value});
+    storeCredentials();
     alert("Configuration complete, please try to access to LeetCode problems.");
 
     window.close();
   }, false);
 
   window.addEventListener('blur', function() {
-    chrome.storage.local.set({'userId': userIdTB.value});
-    chrome.storage.local.set({'userKey': userKeyTB.value});
+    storeCredentials();
   }, false);
 
 }, false);
