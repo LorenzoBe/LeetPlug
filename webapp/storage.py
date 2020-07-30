@@ -50,7 +50,7 @@ class Storage():
         return True
 
     def getUsersIterators(self, userId=None, userKey=None, email=None):
-        if userId and userKey:
+        if userId  is not None and userKey is not None:
             items = self.users.query_items(
                 query='SELECT * FROM c WHERE c.userId=@userId AND c.key=@userKey',
                 parameters=[
@@ -58,21 +58,21 @@ class Storage():
                     dict(name='@userKey', value=userKey)
                 ],
                 enable_cross_partition_query=True)
-        elif userId:
+        elif userId is not None:
             items = self.users.query_items(
                 query='SELECT * FROM c WHERE c.userId=@userId',
                 parameters=[
                     dict(name='@userId', value=userId)
                 ],
                 enable_cross_partition_query=True)
-        elif userKey:
+        elif userKey is not None:
             items = self.users.query_items(
                 query='SELECT * FROM c WHERE c.key=@userKey',
                 parameters=[
                     dict(name='@userKey', value=userKey)
                 ],
                 enable_cross_partition_query=True)
-        elif email:
+        elif email is not None:
             items = self.users.query_items(
                 query='SELECT * FROM c WHERE c.email=@email',
                 parameters=[
@@ -111,14 +111,14 @@ class Storage():
         return True
 
     def getProblemsIterators(self, userId: int=None, id: str=None):
-        if id:
+        if id is not None:
             items = self.events.query_items(
                 query='SELECT * FROM c WHERE c.id=@id',
                 parameters=[
                     dict(name='@id', value=id)
                 ],
                 enable_cross_partition_query=True)
-        elif userId:
+        elif userId is not None:
             items = self.events.query_items(
                 query='SELECT * FROM c WHERE c.userId=@userId',
                 parameters=[
