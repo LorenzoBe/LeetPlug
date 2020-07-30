@@ -3,7 +3,7 @@
 
     "name": "LeetPlug",
     "description": "This extension adds tracking features to the LeetCode interface.",
-    "version": "1.0.2",
+    "version": "1.0.3",
 
     "icons": { "16": "images/brain16.png",
         "24": "images/brain24.png",

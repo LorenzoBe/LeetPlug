@@ -31,6 +31,7 @@ function requestUserKey(email) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+  var leetplugSiteAnchor = document.getElementById("leetplugSiteLink");
   var emailTB = document.getElementById("txtEmail");
   var confirmEmailTB = document.getElementById("txtConfirmEmail");
   var submitButton = document.getElementById('btnSubmit');
@@ -39,13 +40,17 @@ document.addEventListener('DOMContentLoaded', function() {
   var saveButton = document.getElementById('btnSave');
   var policyAgreeCB = document.getElementById("policyAgree");
 
-  chrome.storage.local.get(['email', 'userId', 'userKey', 'webAppURL', 'webAppBasic'], function(result) {
+  chrome.storage.local.get(['email', 'policyAgreeCB', 'userId', 'userKey', 'webAppURL', 'webAppBasic'], function(result) {
     if (!(typeof result.email === 'undefined'))
       emailTB.value = result.email;
+    if (!(typeof result.policyAgreeCB === 'undefined'))
+      policyAgreeCB.checked = result.policyAgreeCB;
     if (!(typeof result.email === 'undefined'))
       confirmEmailTB.value = result.email;
-    if (!(typeof result.userId === 'undefined'))
+    if (!(typeof result.userId === 'undefined')) {
       userIdTB.value = result.userId;
+      leetplugSiteAnchor.href = "https://leetplug.azurewebsites.net/data?userId=" + userIdTB.value;
+    }
     if (!(typeof result.userKey === 'undefined'))
       userKeyTB.value = result.userKey;
     if (!(typeof result.webAppURL === 'undefined'))
@@ -90,6 +95,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     chrome.storage.local.set({'email': email});
+    chrome.storage.local.set({'policyAgreeCB': true});
     requestUserKey(email)
   }, false);
 
