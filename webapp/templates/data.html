@@ -82,6 +82,16 @@ body {
 </div>
 <script>
 
+function pad(val) {
+  return val > 9 ? val : "0" + val;
+}
+
+function formatDate(timestampValue) {
+  var date = new Date(timestampValue * 1000);
+  let formattedDate = date.getFullYear() + "-" + pad(date.getMonth() + 1) + "-" + pad(date.getDate()) + " " + pad(date.getHours()) + ":" + pad(date.getMinutes()) + ":" + pad(date.getSeconds())
+  return formattedDate;
+}
+
 var problemsFromPy = JSON.parse('{{ problems|safe }}');
 var dataSet = [];
 
@@ -92,8 +102,7 @@ for (var i = 0; i < problemsFromPy.problems.length; ++i) {
   problem.push(problemsFromPy.problems[i]['Rejected']);
   problem.push(problemsFromPy.problems[i]['Accepted']);
   if (problemsFromPy.problems[i]['Last Accepted'] != "NA") {
-    var lastAccepted = new Date(problemsFromPy.problems[i]['Last Accepted'] * 1000);
-    problem.push(lastAccepted.toString().split(' ', 5).join(' '));
+    problem.push(formatDate(problemsFromPy.problems[i]['Last Accepted']));
   } else {
     problem.push("NA");
   }
