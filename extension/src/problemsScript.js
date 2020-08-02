@@ -26,8 +26,9 @@ const customControlButtons = `
 <div id='controlButtons'>
 <p id="controlButtonsTitle" class="title_style">LeetPlug mask</p>
 <p id="controlButtonsText" class="text_style">Choose how to start the problem:</p>
-<p id="showProblemWithTimer" class="round_style">Show the problem with time tracking</p>
-<p id="showProblemNoTimer" class="round_style">Show the problem without time tracking</p>
+<p id="showProblemWithStopwatchAndTrack" class="round_style">Show the problem with visible stopwatch and remote tracking</p>
+<p id="showProblemNoStopwatchButTrack" class="round_style">Show the problem with hidden stopwatch and remote tracking</p>
+<p id="showProblemNoStopwatchNoTrack" class="round_style">Show the problem without any tracking</p>
 </div>
 `
 
@@ -165,8 +166,9 @@ function hideTimer() {
 function showAll() {
     $("#controlButtonsTitle").attr("style", "display: none;");
     $("#controlButtonsText").attr("style", "display: none;");
-    $("#showProblemWithTimer").attr("style", "display: none;");
-    $("#showProblemNoTimer").attr("style", "display: none;");
+    $("#showProblemWithStopwatchAndTrack").attr("style", "display: none;");
+    $("#showProblemNoStopwatchButTrack").attr("style", "display: none;");
+    $("#showProblemNoStopwatchNoTrack").attr("style", "display: none;");
     $(problemDescriptionElement).attr("style", "display: visible;");
     $(codeAreaElement).children(codingPanelElement).attr("style", "visibility: visible;");
 }
@@ -255,7 +257,7 @@ function onLoadPage (evt) {
             $(customControlButtons).insertBefore($(problemDescriptionElement))
 
             // set the callbacks on click on button
-            $("#showProblemWithTimer").click(function(e) {
+            $("#showProblemWithStopwatchAndTrack").click(function(e) {
                 // if the coding panel is not clean
                 if ($(resetCodeButton)[0] !== undefined) {
                     // trigger the reset of the code
@@ -269,7 +271,21 @@ function onLoadPage (evt) {
                     sendProblemEvent(currentProblem, "start", session);
                 }
             });
-            $("#showProblemNoTimer").click(function(e) {
+            $("#showProblemNoStopwatchButTrack").click(function(e) {
+                // if the coding panel is not clean
+                if ($(resetCodeButton)[0] !== undefined) {
+                    // trigger the reset of the code
+                    $(resetCodeButton)[0].click();
+                } else if ($(resetCodeButtonWarn)[1] !== undefined) {
+                    // trigger the reset of the code
+                    $(resetCodeButtonWarn)[1].click();
+                } else {
+                    showAll();
+                    hideTimer();
+                    sendProblemEvent(currentProblem, "start", session);
+                }
+            });
+            $("#showProblemNoStopwatchNoTrack").click(function(e) {
                 showAll();
                 hideTimer();
                 sendProblemEvent(currentProblem, "start_no_track", session);
