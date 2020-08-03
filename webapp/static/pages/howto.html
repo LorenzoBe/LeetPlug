@@ -99,14 +99,19 @@ Please copy and paste the User Id and the User Key received by email inside the 
 <b>NOTE: a restart of the Chrome browser could be necessary to allow the proper load of the configuration.</b>
 
 <h3>Extension usage</h3>
-Now you should be able to open any problem inside the <a href="https://leetcode.com/problemset/all/" target="_blank">https://leetcode.com/problemset/all/</a> problem set, ans see the extension in action.<br>
-The problem description is hidden and two buttons are displayed, allowing to start the exercise with the stopwatch visible or not in the lower-right corner.<br>
+Now you should be able to open any problem inside the <a href="https://leetcode.com/problemset/all/" target="_blank">https://leetcode.com/problemset/all/</a> problem set and see the extension in action.<br>
+The problem description is hidden and three buttons are displayed, allowing to start the exercise with three modalities:
+<ul>
+  <li>With a visible running stopwatch in the lower right corner and remote tracking of the submission results</li>
+  <li>With a hidden running stopwatch and remote tracking of the submission results</li>
+  <li>Without any LeetPlug feature: no stopwatch nor submission tracking</li>
+</ul>
 <a href="/static/images/time_tracking_buttons.png" target="_blank" ><img class="center_img" src="/static/images/time_tracking_buttons.png" width="50%" height="50%"></a><br>
 
-When the selected problem already has some custom code in the solution panel and the user select to proceed with time tracking, the extension propose to reset the current code to start from a clean situation. It uses the LeetCode event, triggering the alert window:<br>
+When the selected problem already has some custom code in the solution panel and the user select to proceed with remote tracking, the extension propose to reset the current code to start from a clean situation. It uses the LeetCode event, triggering the alert window:<br>
 <a href="/static/images/clear_confirmation.png" target="_blank" ><img class="center_img" src="/static/images/clear_confirmation.png" width="50%" height="50%"></a><br>
 If you confirm, the current code is wiped out and you need to click again on the LeetPlug selection button to start the exercise.<br>
-When a problem is started with the time tracking option, the stopwatch is started. The system trak all the submissions, including the failed ones, until the first acceped. All the record are sent to the remote server for later visualisation.
+When a problem is started with the time tracking option, the stopwatch is started. The system track all the submissions, including the failed ones, until the first acceped. All the records are sent to the remote server for later visualisation.
 
 <h3>Results page</h3>
 All the problems which has been started, rejected or successfully completed are tracked and set to the remote server. You can access to it throught this site, insertig your User Id in the following field:<br>
