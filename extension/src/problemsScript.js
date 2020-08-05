@@ -4,6 +4,7 @@ window.addEventListener("load", onLoadPage, false);
 // Configuration consts
 const problemDescriptionParent = "[data-key='description-content']";
 const problemDescriptionElement = "[class*='description__']";
+const problemDescriptionTabElement = "[data-key='description']";
 const submissionResultElement = "[class*='result__']";
 const submissionSuccessElement = "[class*='success__']";
 const submissionErrorElement = "[class*='error__']";
@@ -130,6 +131,14 @@ function startTimer(){
     }
 }
 
+function stopTimer(){
+    clearInterval(tInterval);
+    savedTime = 0;
+    difference = 0;
+    paused = 0;
+    running = 0;
+}
+
 function pauseTimer(){
     if (difference && !paused) {
         clearInterval(tInterval);
@@ -141,16 +150,27 @@ function pauseTimer(){
     }
 }
 
+function resetTimer(){
+    clearInterval(tInterval);
+    savedTime = 0;
+    difference = 0;
+    paused = 0;
+    running = 0;
+    showTime();
+}
+
 // Thanks to https://medium.com/@olinations/stopwatch-script-that-keeps-accurate-time-a9b78f750b33
 // for the nice timer :D
-function getShowTime(){
+function getTime() {
     updatedTime = new Date().getTime();
     if (savedTime){
         difference = (updatedTime - startTime) + savedTime;
     } else {
         difference =  updatedTime - startTime;
     }
+}
 
+function showTime() {
     var hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     var minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
     var seconds = Math.floor((difference % (1000 * 60)) / 1000);
@@ -158,12 +178,38 @@ function getShowTime(){
     $("#timer").html(pad(hours) + " Hours " + pad(minutes) + " Minutes " + pad(seconds) + " Seconds");
 }
 
+function getShowTime() {
+    getTime();
+    showTime();
+}
+
+// Show the timer
+function showTimer() {
+    $("#timer").attr("style", "display: visible;");
+    timerVisible = true;
+}
+
+// Hide the timer
 function hideTimer() {
     $("#timer").attr("style", "display: none;");
+    timerVisible = false;
+}
+
+// Hide the original elements and just show the buttons
+function enableMask() {
+    $("#controlButtonsTitle").attr("style", "display: visible;");
+    $("#controlButtonsText").attr("style", "display: visible;");
+    $("#showProblemWithStopwatchAndTrack").attr("style", "display: visible;");
+    $("#showProblemNoStopwatchButTrack").attr("style", "display: visible;");
+    $("#showProblemNoStopwatchNoTrack").attr("style", "display: visible;");
+    $(problemDescriptionElement).attr("style", "display: none;");
+    $(codeAreaElement).children(codingPanelElement).attr("style", "visibility: hidden;");
+
+    maskEnabled = true;
 }
 
 // Show original hidden elements
-function showAll() {
+function disableMask() {
     $("#controlButtonsTitle").attr("style", "display: none;");
     $("#controlButtonsText").attr("style", "display: none;");
     $("#showProblemWithStopwatchAndTrack").attr("style", "display: none;");
@@ -171,6 +217,8 @@ function showAll() {
     $("#showProblemNoStopwatchNoTrack").attr("style", "display: none;");
     $(problemDescriptionElement).attr("style", "display: visible;");
     $(codeAreaElement).children(codingPanelElement).attr("style", "visibility: visible;");
+
+    maskEnabled = false;
 }
 
 // Send the event related to the problem (start, submit) to the remote web service
@@ -202,7 +250,7 @@ function getProblem() {
     if (tokens.length >= 2)
         return tokens[tokens.length - 2];
 
-    return "NA"
+    return "NA";
 }
 
 // Get the problem difficulty
@@ -219,114 +267,139 @@ function prepareSession() {
     session = Date.now();
     currentProblem = getProblem();
     console.log("PROBLEM: " + currentProblem);
-    showAll();
+    disableMask();
+    problemDifficulty = getProblemDifficulty();
 }
+
+// This function can identify if the submit was completed and stop the polling cycle
+function checkForSubmitComplete () {
+    $(submissionSuccessElement).each(function( index ) {
+        if ($(this).parent('[class*=result__]').length) {
+            clearInterval(jsSubmissionChecktimer);
+            console.log("SUCCESS");
+            stopTimer();
+            sendProblemEvent(currentProblem, "result_ok", session);
+        }
+    });
+    $(submissionErrorElement).each(function( index ) {
+        if ($(this).parent('[class*=result__]').length) {
+            clearInterval(jsSubmissionChecktimer);
+            console.log("ERROR");
+            sendProblemEvent(currentProblem, "result_ko", session);
+        }
+    });
+}
+
+var descriptionTrigger = true;
+var codeAreaTrigger = true;
+var maskEnabled = true;
+var timerVisible = true;
+var currenDescriptionLink = "";
+
+function checkForProblemChange () {
+    if ($(problemDescriptionTabElement).find('a').attr('href') != currenDescriptionLink) {
+        currenDescriptionLink = $(problemDescriptionTabElement).find('a').attr('href');
+        console.log("NEW PROBLEM: " + currenDescriptionLink);
+        clearInterval(jsSubmissionChecktimer);
+        resetTimer();
+        showTimer();
+        enableMask();
+    }
+}
+
+function checkForMutations () {
+    if (!$(problemDescriptionElement).length) {
+        descriptionTrigger = true;
+    } else if ($(problemDescriptionElement).length && descriptionTrigger) {
+        descriptionTrigger = false;
+        console.log("DESC CREATED!");
+
+        if (maskEnabled) {
+            $(problemDescriptionElement).attr("style", "display: none;");
+
+            if (!$('#controlButtons').length) {
+                // store the current Description URL, that will later used to understand if the
+                // content is changed
+                currenDescriptionLink = $(problemDescriptionTabElement).find('a').attr('href');
+                setInterval(checkForProblemChange, 200);
+
+                $(customControlButtons).insertBefore($(problemDescriptionElement));
+
+                // set the callbacks on click on button
+                $("#showProblemWithStopwatchAndTrack").click(function(e) {
+                    // if the coding panel is not clean
+                    if ($(resetCodeButton)[0] !== undefined) {
+                        // trigger the reset of the code
+                        $(resetCodeButton)[0].click();
+                    } else if ($(resetCodeButtonWarn)[1] !== undefined) {
+                        // trigger the reset of the code
+                        $(resetCodeButtonWarn)[1].click();
+                    } else {
+                        prepareSession();
+                        startTimer();
+                        sendProblemEvent(currentProblem, "start", session);
+                    }
+                });
+                $("#showProblemNoStopwatchButTrack").click(function(e) {
+                    // if the coding panel is not clean
+                    if ($(resetCodeButton)[0] !== undefined) {
+                        // trigger the reset of the code
+                        $(resetCodeButton)[0].click();
+                    } else if ($(resetCodeButtonWarn)[1] !== undefined) {
+                        // trigger the reset of the code
+                        $(resetCodeButtonWarn)[1].click();
+                    } else {
+                        prepareSession();
+                        hideTimer();
+                        sendProblemEvent(currentProblem, "start", session);
+                    }
+                });
+                $("#showProblemNoStopwatchNoTrack").click(function(e) {
+                    prepareSession();
+                    hideTimer();
+                    sendProblemEvent(currentProblem, "start_no_track", session);
+                });
+            }
+        }
+    }
+
+    if (!$(codeAreaElement).length &&
+        !$(codeAreaElement).children(codingPanelElement).length) {
+        codeAreaTrigger = true;
+        clearInterval(jsSubmissionChecktimer);
+    } else if ($(codeAreaElement).length &&
+                $(codeAreaElement).children(codingPanelElement).length &&
+                codeAreaTrigger) {
+        codeAreaTrigger = false;
+        console.log("CODE CREATED!");
+
+        if (maskEnabled) {
+            // hide the coding panel
+            // use "visibility" to keep the space in the layout
+            $(codeAreaElement).children(codingPanelElement).attr("style", "visibility: hidden;");
+        }
+
+        // add the timer near the submission buttons
+        $('<label id="timer" class="timer_style" style="display: none;">00 Hours 00 Minutes 00 Seconds</label>').insertBefore($(runCodeButton));
+        if (timerVisible)
+            showTimer();
+
+        $(submitCodeButton).click(function(e) {
+            console.log("SUBMIT");
+
+            jsSubmissionChecktimer = setInterval(checkForSubmitComplete, 200);
+        });
+    }
+};
+
 // Main onLoadPage function, starts the cycles needed to discover the elements inside the page
 // and to attach listeners to them
 function onLoadPage (evt) {
-    var problemDescriptionFound = false;
-    var codingPanelFound = false;
     // insert the styles for the custom components
     var styleSheet = document.createElement("style")
     styleSheet.type = "text/css"
     styleSheet.innerText = timerStyle
     document.head.appendChild(styleSheet)
 
-    // This function can identify if the submit was completed and stop the polling cycle
-    function checkForSubmitComplete () {
-        $(submissionSuccessElement).each(function( index ) {
-            if ($(this).parent('[class*=result__]').length) {
-                clearInterval(jsSubmissionChecktimer);
-                console.log("SUCCESS");
-                pauseTimer();
-                sendProblemEvent(currentProblem, "result_ok", session);
-            }
-        });
-        $(submissionErrorElement).each(function( index ) {
-            if ($(this).parent('[class*=result__]').length) {
-                clearInterval(jsSubmissionChecktimer);
-                console.log("ERROR");
-                sendProblemEvent(currentProblem, "result_ko", session);
-            }
-        });
-    }
-
-    // this function will be called in a loop to wait for dynamic elements creation
-    function checkForJSLoadComplete () {
-        // check if the problem description element has been created
-        if ($(problemDescriptionElement).length && !problemDescriptionFound) {
-            console.log('Problem description found');
-            // hide the problem description
-            // used "display" to free up the space and put the button instead
-            $(problemDescriptionElement).attr("style", "display: none;");
-            $(customControlButtons).insertBefore($(problemDescriptionElement))
-
-            // set the callbacks on click on button
-            $("#showProblemWithStopwatchAndTrack").click(function(e) {
-                // if the coding panel is not clean
-                if ($(resetCodeButton)[0] !== undefined) {
-                    // trigger the reset of the code
-                    $(resetCodeButton)[0].click();
-                } else if ($(resetCodeButtonWarn)[1] !== undefined) {
-                    // trigger the reset of the code
-                    $(resetCodeButtonWarn)[1].click();
-                } else {
-                    prepareSession();
-                    startTimer();
-                    sendProblemEvent(currentProblem, "start", session);
-                }
-            });
-            $("#showProblemNoStopwatchButTrack").click(function(e) {
-                // if the coding panel is not clean
-                if ($(resetCodeButton)[0] !== undefined) {
-                    // trigger the reset of the code
-                    $(resetCodeButton)[0].click();
-                } else if ($(resetCodeButtonWarn)[1] !== undefined) {
-                    // trigger the reset of the code
-                    $(resetCodeButtonWarn)[1].click();
-                } else {
-                    prepareSession();
-                    hideTimer();
-                    sendProblemEvent(currentProblem, "start", session);
-                }
-            });
-            $("#showProblemNoStopwatchNoTrack").click(function(e) {
-                prepareSession();
-                hideTimer();
-                sendProblemEvent(currentProblem, "start_no_track", session);
-            });
-
-            problemDescriptionFound = true;
-        }
-        // check if the coding panel has been created
-        if ($(codeAreaElement).length &&
-            $(codeAreaElement).children(codingPanelElement).length &&
-            !codingPanelFound) {
-            console.log('Problem coding frame found');
-            // hide the coding panel
-            // use "visibility" to keep the space in the layout
-            $(codeAreaElement).children(codingPanelElement).attr("style", "visibility: hidden;");
-
-            // add the timer near the submission buttons
-            $('<label id="timer" class="timer_style">00 Hours 00 Minutes 00 Seconds</label>').insertBefore($(runCodeButton))
-
-            $(submitCodeButton).click(function(e) {
-                console.log("SUBMIT");
-
-                jsSubmissionChecktimer = setInterval(checkForSubmitComplete, 200);
-            });
-
-            codingPanelFound = true;
-        }
-        // check if all the required elements have been found
-        if (problemDescriptionFound && codingPanelFound) {
-            console.log('Found all the required elements. Disabling polling timer');
-            // disable the loop which checks the page content
-            clearInterval(jsInitChecktimer);
-            problemDifficulty = getProblemDifficulty();
-        }
-    }
-
-    // start the polling loop to check when the dynamics components are created
-    var jsInitChecktimer = setInterval(checkForJSLoadComplete, 200);
+    setInterval(checkForMutations, 200);
 }
