@@ -2,7 +2,8 @@ console.log('Problems page intercepted');
 window.addEventListener("load", onLoadPage, false);
 
 // Configuration consts
-const problemDescriptionElement = "[data-key='description-content']";
+const problemDescriptionParent = "[data-key='description-content']";
+const problemDescriptionElement = "[class*='description__']";
 const submissionResultElement = "[class*='result__']";
 const submissionSuccessElement = "[class*='success__']";
 const submissionErrorElement = "[class*='error__']";
@@ -78,10 +79,9 @@ var timerStyle = `
 var sec = 0;
 var userId = "";
 var userKey = "";
-var pageURL = window.location.href;
-var currentProblem = getProblem();
+var currentProblem = "";
 var problemDifficulty = 'Unknown';
-var session = Date.now();
+var session = 0;
 var webAppURL = "";
 var webAppBasic = "";
 var jsSubmissionChecktimer;
@@ -196,12 +196,11 @@ function sendProblemEvent(problem, event, session) {
 
 // Get the problem identifier from token of the URL
 function getProblem() {
+    var pageURL = window.location.href;
     var tokens = pageURL.split("/");
 
-    if (tokens.length >= 2 && tokens[tokens.length - 2] != 'submissions' && tokens[tokens.length - 2] != 'solution')
+    if (tokens.length >= 2)
         return tokens[tokens.length - 2];
-    else if (tokens.length >= 3 && tokens[tokens.length - 3] != 'submissions' && tokens[tokens.length - 3] != 'solution')
-        return tokens[tokens.length - 3];
 
     return "NA"
 }
@@ -216,6 +215,12 @@ function getProblemDifficulty() {
         return hardId;
 }
 
+function prepareSession() {
+    session = Date.now();
+    currentProblem = getProblem();
+    console.log("PROBLEM: " + currentProblem);
+    showAll();
+}
 // Main onLoadPage function, starts the cycles needed to discover the elements inside the page
 // and to attach listeners to them
 function onLoadPage (evt) {
@@ -266,7 +271,7 @@ function onLoadPage (evt) {
                     // trigger the reset of the code
                     $(resetCodeButtonWarn)[1].click();
                 } else {
-                    showAll();
+                    prepareSession();
                     startTimer();
                     sendProblemEvent(currentProblem, "start", session);
                 }
@@ -280,13 +285,13 @@ function onLoadPage (evt) {
                     // trigger the reset of the code
                     $(resetCodeButtonWarn)[1].click();
                 } else {
-                    showAll();
+                    prepareSession();
                     hideTimer();
                     sendProblemEvent(currentProblem, "start", session);
                 }
             });
             $("#showProblemNoStopwatchNoTrack").click(function(e) {
-                showAll();
+                prepareSession();
                 hideTimer();
                 sendProblemEvent(currentProblem, "start_no_track", session);
             });
