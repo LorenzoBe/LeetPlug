@@ -296,8 +296,9 @@ var maskEnabled = true;
 var timerVisible = true;
 var currenDescriptionLink = "";
 
-function checkForProblemChange () {
-    if ($(problemDescriptionTabElement).find('a').attr('href') != currenDescriptionLink) {
+function checkForMutations () {
+    if (currenDescriptionLink != "" &&
+        $(problemDescriptionTabElement).find('a').attr('href') != currenDescriptionLink) {
         currenDescriptionLink = $(problemDescriptionTabElement).find('a').attr('href');
         console.log("NEW PROBLEM: " + currenDescriptionLink);
         clearInterval(jsSubmissionChecktimer);
@@ -305,9 +306,7 @@ function checkForProblemChange () {
         showTimer();
         enableMask();
     }
-}
 
-function checkForMutations () {
     if (!$(problemDescriptionElement).length) {
         descriptionTrigger = true;
     } else if ($(problemDescriptionElement).length && descriptionTrigger) {
@@ -321,7 +320,6 @@ function checkForMutations () {
                 // store the current Description URL, that will later used to understand if the
                 // content is changed
                 currenDescriptionLink = $(problemDescriptionTabElement).find('a').attr('href');
-                setInterval(checkForProblemChange, 200);
 
                 $(customControlButtons).insertBefore($(problemDescriptionElement));
 
@@ -387,7 +385,7 @@ function checkForMutations () {
         $(submitCodeButton).click(function(e) {
             console.log("SUBMIT");
 
-            jsSubmissionChecktimer = setInterval(checkForSubmitComplete, 200);
+            jsSubmissionChecktimer = setInterval(checkForSubmitComplete, 500);
         });
     }
 };
@@ -401,5 +399,5 @@ function onLoadPage (evt) {
     styleSheet.innerText = timerStyle
     document.head.appendChild(styleSheet)
 
-    setInterval(checkForMutations, 200);
+    setInterval(checkForMutations, 500);
 }
