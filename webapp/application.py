@@ -101,9 +101,16 @@ def eventsRequestFilter() -> str:
 
     return userKey
 
+def clientIpFilter() -> str:
+    clientIp = get_remote_address()
+    clientIpHeader = request.headers.getlist("X-Forwarded-For")
+    print('Remote IP: {} or {}'.format(clientIp, clientIpHeader))
+
+    return clientIpHeader
+
 @app.route('/events', methods = ['POST'])
 @auth.login_required
-@limiter.limit("1000/hour")
+@limiter.limit("100/hour", key_func=clientIpFilter)
 @limiter.limit("1/second", key_func=eventsRequestFilter)
 def eventsFunction():
     userId = request.form.get('id', default=0, type = int)
