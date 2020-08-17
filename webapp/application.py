@@ -114,6 +114,8 @@ def clientIpFilter() -> str:
 @limiter.limit("1/second", key_func=eventsRequestFilter)
 def eventsFunction():
     userId = request.form.get('id', default=0, type = int)
+    if userId == 0:
+        return 'Request failed. User issue.', 500
     userKey = eventsRequestFilter()
     problem = request.form.get('problem', default='', type = str)
     difficulty = request.form.get('difficulty', default=0, type = int)
