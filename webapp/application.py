@@ -181,6 +181,7 @@ def data():
     problems = storage.getProblems(userId, id=None)
 
     # prepare the structure to be injected in the JavaScript
+    statsForJs = {'stats': {}}
     problemsForJs = {'problems': []}
     for problem in problems:
         problemJs = {}
@@ -215,6 +216,10 @@ def data():
                     results_ok[item['id']] = item['time']
                     lastAccepted = item['time']
                     lastFinishTime = lastAccepted - starts[item['id']]
+                    # fill the stats
+                    currentKey = item['time'] // (60 * 60 * 24) * (60 * 60 * 24)
+                    statsForJs['stats'][currentKey] = statsForJs['stats'].get(currentKey, 0) + 1
+
             problemJs['Accepted'] = len(results_ok)
 
         if lastAccepted:
@@ -233,5 +238,5 @@ def data():
         if addProblem:
             problemsForJs['problems'].append(problemJs)
 
-    # inject the JSON representation of the problems into the page and return it
-    return render_template('data.html', problems=json.dumps(problemsForJs), userIdPlaceholder = userId)
+    # inject the JSON representations into the page and return it
+    return render_template('data.html', stats=json.dumps(statsForJs), problems=json.dumps(problemsForJs), userIdPlaceholder = userId)
