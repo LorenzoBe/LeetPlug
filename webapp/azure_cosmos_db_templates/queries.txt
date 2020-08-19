@@ -1,0 +1,3 @@
+SELECT DISTINCT c.userId FROM c WHERE IS_NUMBER(StringToNumber(c.problem)) ORDER BY c._ts DESC
+SELECT DISTINCT c.userId FROM c WHERE c.problem = 'discuss' ORDER BY c._ts DESC
+SELECT c.userId, count(1) as probs FROM c where c.events.result_ok != null group by c.userId
