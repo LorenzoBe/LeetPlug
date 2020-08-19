@@ -12,6 +12,7 @@ function requestUserKey(email) {
   let url = new URL(webAppURL + '/users');
   var formData = new FormData();
   formData.append('email', email);
+  formData.append('clientVersion', chrome.runtime.getManifest().version);
 
   req.open("POST", url, true)
   req.setRequestHeader('Authorization', webAppBasic);

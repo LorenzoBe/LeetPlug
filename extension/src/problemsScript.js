@@ -231,6 +231,7 @@ function sendProblemEvent(problem, event, session) {
     var formData = new FormData();
     formData.append('id', userId);
     formData.append('key', userKey);
+    formData.append('clientVersion', chrome.runtime.getManifest().version);
     formData.append('problem', problem);
     formData.append('difficulty', problemDifficulty);
     formData.append('event', event);

@@ -61,8 +61,10 @@ def usersRequestFilter() -> str:
 @limiter.limit("10/minute", key_func=usersRequestFilter)
 def usersFunction():
     email = usersRequestFilter()
-
     if email == '': return 'Request failed. Email missing.', 500
+    # get client version
+    clientVersion = request.form.get('clientVersion', default='', type = str)
+
     # check if email already exists
     user = storage.getUser(email=email)
     if len(user) != 0: return 'Request failed. Email invalid or already in use.', 500
@@ -80,7 +82,8 @@ def usersFunction():
         'userId': userId,
         'key': userKey,
         'created': int(time.time()),
-        'lastEvent': 0
+        'lastEvent': 0,
+        'clientVersion': clientVersion
     }
 
     if not storage.upsertUser(newUser):
@@ -114,9 +117,15 @@ def clientIpFilter() -> str:
 @limiter.limit("1/second", key_func=eventsRequestFilter)
 def eventsFunction():
     userId = request.form.get('id', default=0, type = int)
-    if userId == 0:
-        return 'Request failed. User issue.', 500
     userKey = eventsRequestFilter()
+    # discard totally invalid requests
+    if userId == 0 or userKey == '':
+        return 'Request failed. User issue.', 500
+
+    # get client version
+    clientVersion = request.form.get('clientVersion', default='', type = str)
+
+    # get problem details
     problem = request.form.get('problem', default='', type = str)
     difficulty = request.form.get('difficulty', default=0, type = int)
     event = request.form.get('event', default='', type = str)
@@ -128,8 +137,9 @@ def eventsFunction():
     if len(user) != 1: return 'Request failed. User issue.', 500
     if userKey != user[0]['key']:
         return 'Request failed. User issue.', 500
-    # update the timestamp of last event of user
+    # update the timestamp and client version of last event of user
     user[0]['lastEvent'] = eventDescription['time']
+    user[0]['clientVersion'] = clientVersion
     if not storage.upsertUser(user=user[0], etag=user[0]['_etag']):
         return 'Request failed. User issue.', 500
 
