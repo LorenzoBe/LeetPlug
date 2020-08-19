@@ -243,8 +243,7 @@ function sendProblemEvent(problem, event, session) {
 }
 
 // Get the problem identifier from token of the URL
-function getProblem() {
-    var pageURL = window.location.href;
+function getProblem(pageURL) {
     var tokens = pageURL.split("/");
 
     if (tokens.length >= 2)
@@ -261,14 +260,6 @@ function getProblemDifficulty() {
         return mediumId;
     if ($(questionTitleElement).parent().children().children(difficultyHardElement).length)
         return hardId;
-}
-
-function prepareSession() {
-    session = Date.now();
-    currentProblem = getProblem();
-    console.log("PROBLEM: " + currentProblem);
-    disableMask();
-    problemDifficulty = getProblemDifficulty();
 }
 
 // This function can identify if the submit was completed and stop the polling cycle
@@ -295,6 +286,14 @@ var codeAreaTrigger = true;
 var maskEnabled = true;
 var timerVisible = true;
 var currenDescriptionLink = "";
+
+function prepareSession() {
+    session = Date.now();
+    currentProblem = getProblem(currenDescriptionLink);
+    console.log("PROBLEM: " + currentProblem);
+    disableMask();
+    problemDifficulty = getProblemDifficulty();
+}
 
 function checkForMutations () {
     if (currenDescriptionLink != "" &&
@@ -384,7 +383,7 @@ function checkForMutations () {
 
         $(submitCodeButton).click(function(e) {
             console.log("SUBMIT");
-
+            clearInterval(jsSubmissionChecktimer);
             jsSubmissionChecktimer = setInterval(checkForSubmitComplete, 500);
         });
     }
