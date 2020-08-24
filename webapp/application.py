@@ -180,13 +180,7 @@ def eventsFunction():
 def root():
     return app.send_static_file('pages/index.html')
 
-@app.route('/data', methods = ['GET'])
-def data():
-    userId = request.args.get('userId', type = int)
-
-    if (userId == None):
-        userId = 0
-
+def getUserHistory(userId: int=0):
     # get all the problems for the specified userId
     problems = storage.getProblems(userId, id=None)
 
@@ -248,5 +242,57 @@ def data():
         if addProblem:
             problemsForJs['problems'].append(problemJs)
 
-    # inject the JSON representations into the page and return it
-    return render_template('data.html', stats=json.dumps(statsForJs), problems=json.dumps(problemsForJs), userIdPlaceholder = userId)
+    return statsForJs, problemsForJs
+
+@app.route('/data', methods = ['GET'])
+def data():
+    userId = request.args.get('userId', default=0, type = int)
+    compareUserId = request.args.get('compareUserId', default=0, type = int)
+
+    statsForJsUser1, problemsForJsUser1 = getUserHistory(userId)
+
+    if (compareUserId == 0):
+        # inject the JSON representations into the page and return it
+        return render_template('data.html',
+            userIdInput=userId,
+            compareUserIdInput=compareUserId,
+            stats=json.dumps(statsForJsUser1),
+            problems=json.dumps(problemsForJsUser1))
+
+    statsForJsUser2, problemsForJsUser2 = getUserHistory(compareUserId)
+
+    problemsForJs = {}
+    for problem in problemsForJsUser1['problems']:
+        problemJs = {}
+        problemJs['Problem'] = problem['Problem']
+        problemJs['Difficulty'] = problem['Difficulty']
+        problemJs['User1 Last Accepted'] = problem['Last Accepted']
+        problemJs['User1 Last Finish Time'] = problem['Last Finish Time']
+        problemJs['User2 Last Accepted'] = "NA"
+        problemJs['User2 Last Finish Time'] = "NA"
+
+        problemsForJs[problem['Problem']] = problemJs
+
+    for problem in problemsForJsUser2['problems']:
+        if problem['Problem'] in problemsForJs:
+            problemsForJs[problem['Problem']]['User2 Last Accepted'] = problem['Last Accepted']
+            problemsForJs[problem['Problem']]['User2 Last Finish Time'] = problem['Last Finish Time']
+        else:
+            problemJs = {}
+            problemJs['Problem'] = problem['Problem']
+            problemJs['Difficulty'] = problem['Difficulty']
+            problemJs['User1 Last Accepted'] = "NA"
+            problemJs['User1 Last Finish Time'] = "NA"
+            problemJs['User2 Last Accepted'] = problem['Last Accepted']
+            problemJs['User2 Last Finish Time'] = problem['Last Finish Time']
+
+            problemsForJs[problem['Problem']] = problemJs
+
+    problemsArray = []
+    for key in problemsForJs.keys():
+        problemsArray.append(problemsForJs[key])
+
+    return render_template('compare.html',
+            userIdInput=userId,
+            compareUserIdInput=compareUserId,
+            problems=json.dumps(problemsArray))

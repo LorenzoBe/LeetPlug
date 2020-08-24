@@ -11,10 +11,6 @@
 <script type="text/javascript" src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
 <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.6.3/js/dataTables.buttons.min.js"></script>
 <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.6.3/js/buttons.html5.min.js"></script>
-
-<script src="https://cdn.amcharts.com/lib/4/core.js"></script>
-<script src="https://cdn.amcharts.com/lib/4/charts.js"></script>
-<script src="https://cdn.amcharts.com/lib/4/themes/animated.js"></script>
 <style>
 header {
   text-align: center;
@@ -128,97 +124,31 @@ body {
     let formattedDate = date.getFullYear() + "-" + pad(date.getMonth() + 1) + "-" + pad(date.getDate()) + " " + pad(date.getHours()) + ":" + pad(date.getMinutes()) + ":" + pad(date.getSeconds())
     return formattedDate;
   }
-  
-  var statsFromPy = JSON.parse('{{ stats|safe }}');
-  var statsDataSet = [];
-  Object.keys(statsFromPy.stats).forEach(function(key) {
-    statsDataSet.push({
-        date: key * 1000,
-        problems: statsFromPy.stats[key]
-    });
-  });
-  statsDataSet.sort();
 
   var problemsFromPy = JSON.parse('{{ problems|safe }}');
   var tableDataSet = [];
 
-  for (var i = 0; i < problemsFromPy.problems.length; ++i) {
+  for (var i = 0; i < problemsFromPy.length; ++i) {
     var problem = [];
-    problem.push(problemsFromPy.problems[i]['Problem']);
-    problem.push(problemsFromPy.problems[i]['Difficulty']);
-    problem.push(problemsFromPy.problems[i]['Rejected']);
-    problem.push(problemsFromPy.problems[i]['Accepted']);
-    if (problemsFromPy.problems[i]['Last Accepted'] != "NA") {
-      problem.push(formatDate(problemsFromPy.problems[i]['Last Accepted']));
+    problem.push(problemsFromPy[i]['Problem']);
+    problem.push(problemsFromPy[i]['Difficulty']);
+    if (problemsFromPy[i]['User1 Last Accepted'] != "NA") {
+      problem.push(formatDate(problemsFromPy[i]['User1 Last Accepted']));
     } else {
       problem.push("NA");
     }
-    problem.push(problemsFromPy.problems[i]['Last Finish Time']);
-    problem.push(problemsFromPy.problems[i]['Users Finish Time']);
-  
+    problem.push(problemsFromPy[i]['User1 Last Finish Time']);
+
+    if (problemsFromPy[i]['User2 Last Accepted'] != "NA") {
+      problem.push(formatDate(problemsFromPy[i]['User2 Last Accepted']));
+    } else {
+      problem.push("NA");
+    }
+    problem.push(problemsFromPy[i]['User2 Last Finish Time']);
+
     tableDataSet.push(problem);
   }
 </script>
-<script>
-  // CHART CODE
-  am4core.ready(function() {
-  
-  // Themes begin
-  am4core.useTheme(am4themes_animated);
-  // Themes end
-  
-  // Create chart instance
-  var chart = am4core.create("chartdiv", am4charts.XYChart);
-  
-  // Add data
-  chart.data = statsDataSet;
-
-  // Add chart title
-  var title = chart.titles.create();
-  title.text = "Daily Workout";
-  title.fontSize = 20;
-  title.marginBottom = 0;
-  
-  // Create axes
-  var dateAxis = chart.xAxes.push(new am4charts.DateAxis());
-  dateAxis.renderer.minGridDistance = 50;
-  
-  var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
-  valueAxis.renderer.minGridDistance = 20;
-  
-  // Create series
-  var series = chart.series.push(new am4charts.LineSeries());
-  series.dataFields.valueY = "problems";
-  series.dataFields.dateX = "date";
-  series.strokeWidth = 2;
-  series.minBulletDistance = 10;
-  series.tooltipText = "{valueY}";
-  series.tooltip.pointerOrientation = "vertical";
-  series.tooltip.background.cornerRadius = 20;
-  series.tooltip.background.fillOpacity = 0.5;
-  series.tooltip.label.padding(12,12,12,12)
-
-  // Make bullets grow on hover
-  var bullet = series.bullets.push(new am4charts.CircleBullet());
-  bullet.circle.strokeWidth = 2;
-  bullet.circle.radius = 4;
-  bullet.circle.fill = am4core.color("#fff");
-
-  var bullethover = bullet.states.create("hover");
-  bullethover.properties.scale = 1.3;
-  
-  // Add scrollbar
-  chart.scrollbarX = new am4charts.XYChartScrollbar();
-  chart.scrollbarX.series.push(series);
-  
-  // Add cursor
-  chart.cursor = new am4charts.XYCursor();
-  chart.cursor.xAxis = dateAxis;
-  chart.cursor.snapToSeries = series;
-  
-  }); // end am4core.ready()
-</script>
-<div id="chartdiv"></div>
 </header>
 <div id="table_container">
 <table id="example" class="display" width="100%"></table>
@@ -236,15 +166,13 @@ $(document).ready(function() {
         columns: [
             { title: "Problem" },
             { title: "Difficulty" },
-            { title: "Rejected" },
-            { title: "Accepted" },
-            { title: "Last Accepted" },
-            { title: "Last Finish Time" },
-            { title: "Users Finish Time" }
+            { title: "User Last Accepted" },
+            { title: "User Last Finish Time" },
+            { title: "Compare Last Accepted" },
+            { title: "Compare Last Finish Time" },
         ],
         columnDefs: [
-            { targets: [1], className: "dt-body-center" },
-            { targets: [2, 3, 4, 5, 6], className: "dt-body-right" },
+            { targets: [2, 3, 4, 5], className: "dt-body-right" },
             {
               targets: [0],
               data: null,
@@ -254,6 +182,7 @@ $(document).ready(function() {
             },
             {
               targets: [1],
+              className: "dt-body-center",
               data: null,
               render: function ( data, type, row, meta ) {
                 if (data[1] == 'Easy')
