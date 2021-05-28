@@ -11,6 +11,7 @@ const submissionErrorElement = "[class*='error__']";
 const codeAreaElement = "[data-cy='code-area']";
 const codingPanelElement = "[class*='content__']";
 const runCodeButton = "[data-cy='run-code-btn']";
+const consoleDivSection = "[class*='func__']";
 const submitCodeButton = "[data-cy='submit-code-btn']";
 const resetCodeButton = "[class*='reset-code-btn__']";
 const resetCodeButtonWarn = "[class*='reset-code-btn-warn__']";
@@ -378,16 +379,16 @@ function checkForMutations () {
         }
 
         // add the timer near the submission buttons
-        $('<label id="timer" class="timer_style" style="display: none;">00 Hours 00 Minutes 00 Seconds</label>').insertBefore($(runCodeButton));
+        $('<label id="timer" class="timer_style" style="display: none;">00 Hours 00 Minutes 00 Seconds</label>').insertBefore($(consoleDivSection));
         if (timerVisible)
             showTimer();
-
-        $(submitCodeButton).click(function(e) {
-            console.log("SUBMIT");
-            clearInterval(jsSubmissionChecktimer);
-            jsSubmissionChecktimer = setInterval(checkForSubmitComplete, 500);
-        });
     }
+
+    $(submitCodeButton).click(function (e) {
+        console.log('SUBMIT');
+        clearInterval(jsSubmissionChecktimer);
+        jsSubmissionChecktimer = setInterval(checkForSubmitComplete, 500);
+    });
 };
 
 // Main onLoadPage function, starts the cycles needed to discover the elements inside the page
